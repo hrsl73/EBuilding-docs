@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Water Meter Flow Analysis - Current Architecture & Limitations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default', themeVariables: { primaryColor: '#2563eb', primaryTextColor: '#1e293b', primaryBorderColor: '#93c5fd', lineColor: '#3b82f6', secondaryColor: '#f1f5f9', tertiaryColor: '#fff' } });
+  </script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --secondary: #64748b;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --border-card: #e2e8f0;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --warning-border: #fde68a;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --success-border: #a7f3d0;
+      --info: #0ea5e9;
+      --info-light: #f0f9ff;
+      --info-border: #bae6fd;
+      --code-bg: #1e293b;
+      --code-text: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding: 0;
+      margin: 0;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: white;
+      padding: 48px 32px;
+      border-bottom: 4px solid var(--primary);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .badge-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(147, 197, 253, 0.4);
+      color: #93c5fd;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: #94a3b8;
+      max-width: 800px;
+      line-height: 1.5;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.875rem;
+      color: #cbd5e1;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-item strong {
+      color: white;
+    }
+
+    .main-layout {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 24px 64px 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 36px;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+      .toc-sidebar {
+        display: none;
+      }
+    }
+
+    /* Table of contents sidebar */
+    .toc-sidebar {
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--secondary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .toc-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: block;
+    }
+
+    .toc-list a:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* Content Area */
+    .content-area {
+      min-width: 0;
+    }
+
+    section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    h2 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 24px 0 12px 0;
+    }
+
+    h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #334155;
+      margin: 16px 0 8px 0;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 0.975rem;
+      margin-bottom: 16px;
+    }
+
+    /* Diagrams */
+    .diagram-container {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin: 20px 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+
+    /* Tables */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    thead {
+      background: #f1f5f9;
+    }
+
+    th {
+      padding: 12px 16px;
+      font-weight: 700;
+      color: #334155;
+      border-bottom: 1px solid var(--border-card);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* Code & Pre */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border: none;
+    }
+
+    /* Callouts / Alerts */
+    .callout {
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      font-size: 0.95rem;
+    }
+
+    .callout-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .callout-content {
+      flex: 1;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .callout.danger {
+      background: var(--danger-light);
+      border: 1px solid var(--danger-border);
+      color: #991b1b;
+    }
+    .callout.danger .callout-title { color: #b91c1c; }
+
+    .callout.warning {
+      background: var(--warning-light);
+      border: 1px solid var(--warning-border);
+      color: #92400e;
+    }
+    .callout.warning .callout-title { color: #b45309; }
+
+    .callout.info {
+      background: var(--info-light);
+      border: 1px solid var(--info-border);
+      color: #075985;
+    }
+    .callout.info .callout-title { color: #0284c7; }
+
+    .callout.success {
+      background: var(--success-light);
+      border: 1px solid var(--success-border);
+      color: #065f46;
+    }
+    .callout.success .callout-title { color: #059669; }
+
+    /* Method Badges */
+    .method-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+
+    .method-get { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .method-post { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .method-put { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .method-delete { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    /* Flaws Card Grid */
+    .flaws-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+      margin: 24px 0;
+    }
+
+    .flaw-card {
+      background: #ffffff;
+      border: 1px solid #fecaca;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.05);
+      border-left: 5px solid var(--danger);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .flaw-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(239, 68, 68, 0.1);
+    }
+
+    .flaw-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .flaw-number {
+      background: var(--danger);
+      color: white;
+      font-weight: 800;
+      font-size: 0.8rem;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flaw-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #991b1b;
+    }
+
+    .flaw-impact {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .impact-critical { background: #fee2e2; color: #991b1b; }
+    .impact-high { background: #ffedd5; color: #9a3412; }
+    .impact-medium { background: #fef9c3; color: #854d0e; }
+
+    .flaw-description {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .flaw-code {
+      margin-top: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.8rem;
+      color: #334155;
+    }
+
+    /* Comparison / Metric Pill */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .pill-blue { background: #dbeafe; color: #1d4ed8; }
+    .pill-red { background: #fee2e2; color: #b91c1c; }
+    .pill-green { background: #dcfce7; color: #15803d; }
+    .pill-orange { background: #ffedd5; color: #c2410c; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--secondary);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-card);
+      background: white;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="badge-header">⚡ Architectural Audit & Flow Deconstruction</div>
+      <h1>Water Meter System in Maintenance Bills</h1>
+      <div class="subtitle">
+        In-depth technical breakdown of the current data models, lifecycle mutations, API endpoints, historical retention, and critical structural flaws.
+      </div>
+      <div class="meta-bar">
+        <div class="meta-item"><strong>Repositories:</strong> society-management-backend & society-management-frontend</div>
+        <div class="meta-item"><strong>Date:</strong> September 2026</div>
+        <div class="meta-item"><strong>Target:</strong> Baseline Analysis for PRD Generation</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="toc-sidebar">
+      <div class="toc-title">📑 Table of Contents</div>
+      <ul class="toc-list">
+        <li><a href="#overview">1. System Overview</a></li>
+        <li><a href="#datamodels">2. Database Collections & Schema</a></li>
+        <li><a href="#workflow">3. End-to-End Step Lifecycle</a></li>
+        <li><a href="#mutation">4. How Data Is Manipulated</a></li>
+        <li><a href="#apis">5. Complete API Catalog</a></li>
+        <li><a href="#retention">6. History & Retention Analysis</a></li>
+        <li><a href="#flaws">7. 10 Critical Flaws & Cons</a></li>
+        <li><a href="#prd-recommendations">8. Recommendations for PRD</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Body -->
+    <main class="content-area">
+
+      <!-- 1. System Overview -->
+      <section id="overview">
+        <h2>1. System Overview & Architecture</h2>
+        <p>
+          In the current system, water meter billing is an add-on submodule built inside the maintenance billing cycle. Instead of modeling physical meters as independent entities with time-series readings, water meter readings are stored as simple scalar properties directly inside the <strong>flat unit record</strong> (<code>floorunits</code>) and snapshot copied into the individual <strong>maintenance bill record</strong> (<code>maintenances</code>).
+        </p>
+
+        <div class="diagram-container">
+          <div class="mermaid">
+graph LR
+    Society["🏢 Society<br>(Rate per unit & Min units)"]
+    FloorUnit["🚪 Floor Unit<br>(water_previous_unit,<br>water_latest_unit)"]
+    AdminMaint["📑 AdminMaintenance<br>(Cycle Dates & Status)"]
+    Maintenance["💳 Maintenance Bill<br>(Snapshot Readings & Charges)"]
+
+    Society --> FloorUnit
+    Society --> AdminMaint
+    FloorUnit --> Maintenance
+    AdminMaint --> Maintenance
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <div class="callout-title">Core Operating Principle</div>
+            Each flat has only <strong>one active reading state</strong>. During bill generation, the admin enters the flat's latest reading. When the bill cycle is published, that latest reading overwrites the previous reading, and the latest reading is cleared.
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Database Collections & Schema -->
+      <section id="datamodels">
+        <h2>2. Database Collections & Schema Breakdown</h2>
+        <p>The water meter reading data is distributed across three primary MongoDB collections:</p>
+
+        <h3>A. <code>societies</code> Collection</h3>
+        <p>Holds global rate pricing and minimum billing thresholds applied across all units in that society.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Field Name</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Source Code Reference</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>water_price_per_unit</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/society.model.js#L69">society.model.js:L69</a></td>
+                <td>Flat rate charged per unit of water consumed (e.g. ₹15/unit).</td>
+              </tr>
+              <tr>
+                <td><code>minimum_water_unit</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/society.model.js#L81">society.model.js:L81</a></td>
+                <td>Minimum billable unit threshold. Units consumed below this count are billed at this floor value.</td>
+              </tr>
+              <tr>
+                <td><code>is_auto_bill_generation_enabled</code></td>
+                <td><code>Boolean</code></td>
+                <td><code>false</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/society.model.js#L73">society.model.js:L73</a></td>
+                <td>Toggle for automatic recurring monthly maintenance bill generation.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>B. <code>floorunits</code> Collection</h3>
+        <p>Master flat record. Stores the current state of water readings for each flat.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Field Name</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Source Code Reference</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>water_previous_unit</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/floorUnit/floorUnit.model.js#L39">floorUnit.model.js:L39</a></td>
+                <td>Baseline reading from the last published billing cycle.</td>
+              </tr>
+              <tr>
+                <td><code>water_latest_unit</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/floorUnit/floorUnit.model.js#L43">floorUnit.model.js:L43</a></td>
+                <td>Staging field holding newly entered reading. Cleared to <code>null</code> upon bill publish!</td>
+              </tr>
+              <tr>
+                <td><code>old_water_previous_unit</code></td>
+                <td><code>[Number]</code></td>
+                <td><code>[]</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/floorUnit/floorUnit.model.js#L47">floorUnit.model.js:L47</a></td>
+                <td>Raw array of old baseline numbers. Only modified when an admin manually calls <code>resetWaterUnits</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>C. <code>maintenances</code> Collection</h3>
+        <p>Individual bill instance for a specific flat in a specific billing cycle.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Field Name</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Source Code Reference</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>floor_unit_id</code></td>
+                <td><code>ObjectId</code> (ref: floorUnit)</td>
+                <td>Required</td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/maintenance/maintenance.model.js#L9">maintenance.model.js:L9</a></td>
+                <td>Link to the target flat.</td>
+              </tr>
+              <tr>
+                <td><code>admin_maintainence_id</code></td>
+                <td><code>ObjectId</code> (ref: AdminMaintenance)</td>
+                <td>Required</td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/maintenance/maintenance.model.js#L24">maintenance.model.js:L24</a></td>
+                <td>Link to the society-wide billing cycle master.</td>
+              </tr>
+              <tr>
+                <td><code>water_previous_unit</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/maintenance/maintenance.model.js#L76">maintenance.model.js:L76</a></td>
+                <td>Snapshot of the starting meter reading at bill generation time.</td>
+              </tr>
+              <tr>
+                <td><code>water_latest_unit</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/maintenance/maintenance.model.js#L80">maintenance.model.js:L80</a></td>
+                <td>Snapshot of the ending meter reading at bill generation time.</td>
+              </tr>
+              <tr>
+                <td><code>water_unit</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/maintenance/maintenance.model.js#L84">maintenance.model.js:L84</a></td>
+                <td>Calculated chargeable water units consumed in this billing cycle.</td>
+              </tr>
+              <tr>
+                <td><code>water_unit_price</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/maintenance/maintenance.model.js#L88">maintenance.model.js:L88</a></td>
+                <td>Snapshot of unit price applied to this bill.</td>
+              </tr>
+              <tr>
+                <td><code>total_bill_amount</code></td>
+                <td><code>Number</code></td>
+                <td><code>null</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/maintenance/maintenance.model.js#L68">maintenance.model.js:L68</a></td>
+                <td>Maintenance amount + (water_unit &times; water_unit_price) + additional expenses.</td>
+              </tr>
+              <tr>
+                <td><code>is_draft</code></td>
+                <td><code>Boolean</code></td>
+                <td><code>true</code></td>
+                <td><a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/maintenance/maintenance.model.js#L96">maintenance.model.js:L96</a></td>
+                <td>Indicates whether the bill is in draft review or published to the member.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. Step-by-Step Lifecycle -->
+      <section id="workflow">
+        <h2>3. End-to-End Step Lifecycle</h2>
+        
+        <div class="diagram-container">
+          <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant Frontend_Water as Web: /water-create-bill
+    participant Frontend_Dur as Web: /duration-maintenance-bill
+    participant Frontend_Review as Web: /create-maintenance-bill
+    participant Backend as Express Server
+    participant DB_Floor as DB: floorunits
+    participant DB_Maint as DB: maintenances
+
+    Admin->>Frontend_Water: 1. Input latest readings wing-by-wing
+    Admin->>Frontend_Water: 2. Click "Save & Next Wing"
+    Frontend_Water->>Backend: PUT /society/floor-unit/edit-floor-units
+    Backend->>DB_Floor: Directly mutates water_latest_unit on FloorUnit!
+
+    Admin->>Frontend_Dur: 3. Select billing duration (start, end, due date)
+    Frontend_Dur->>Backend: POST /society/maintenance/create/:society_id
+    Backend->>DB_Floor: Reads current water_previous_unit & water_latest_unit
+    Backend->>DB_Maint: Creates AdminMaintenance & Maintenance (is_draft = true)
+
+    Admin->>Frontend_Review: 4. Review bill totals (Water readings are READ-ONLY here)
+    Admin->>Frontend_Review: 5. Click "Save & Publish"
+    Frontend_Review->>Backend: PUT /society/maintenance/create-bulk-maintenance-bills/:id
+    Backend->>DB_Maint: Updates bill status, sets is_draft = false
+    Backend->>DB_Floor: water_previous_unit = water_latest_unit; water_latest_unit = null (wiped!)
+    Backend-->>Admin: Success & notifications dispatched to members
+          </div>
+        </div>
+
+        <h3>Phase 1: Entry of Water Readings</h3>
+        <p>
+          Admins navigate to <code>/water-meter-reading/:societyId</code>, click edit, opening <code>/water-create-bill/:societyId</code>. The admin enters readings wing by wing.
+        </p>
+        <pre><code>// create-water-bill.tsx line 240
+const payload = currentWingUnits.map((unit: FloorData) => ({
+  floor_id: unit._id,
+  water_previous_unit: Number(prevFloor[unit._id] ?? unit.water_previous_unit ?? 0),
+  water_latest_unit: Number(latestFloor[unit._id] ?? unit.water_latest_unit ?? 0)
+}))
+editMultipleFloorUnits(payload) // PUT /society/floor-unit/edit-floor-units</code></pre>
+        <p>
+          <strong>Immediate Master Write:</strong> This API call immediately overwrites the master <code>floorunits</code> documents before a bill cycle even exists.
+        </p>
+
+        <h3>Phase 2: Billing Cycle Initialization</h3>
+        <p>
+          After saving all wings, admin arrives at <code>/duration-maintenance-bill/:societyId</code>, picks dates, and clicks Next.
+        </p>
+        <pre><code>// maintenance.service.js line 132 (createMaintenanceBillFromSocietyId)
+const payload = floorUnits.map((data) => {
+  return {
+    floor_unit_id: data._id,
+    water_previous_unit: data.water_previous_unit,
+    water_latest_unit: data.water_latest_unit,
+    water_unit: Math.max((data.water_latest_unit || 0) - (data.water_previous_unit || 0), 0),
+    is_draft: true,
+    admin_maintainence_id: admin_maintenance._id,
+    society_id: societyId,
+    ...commonPayload,
+  };
+});
+await maintenanceDao.createMaintenance(payload);</code></pre>
+
+        <h3>Phase 3: Review & Final Publication</h3>
+        <p>
+          On <code>/create-maintenance-bill/:societyId/:id</code>, the water meter readings are rendered in the summary column. <strong>The admin cannot edit water readings here</strong>.
+          Clicking "Save &amp; Publish" triggers <code>PUT /society/maintenance/create-bulk-maintenance-bills/:admin_maintainence_id</code>.
+        </p>
+        <pre><code>// maintenance.service.js line 330 (createBulkMaintenanceBills)
+const editFloorUnitsWaterReadingsBulkData = floorUnits.map((data) => {
+  const billItem = enrichedPayload.find(item => String(item.floor_unit_id) === String(data._id));
+  const latestFromPayload = billItem?.water_latest_unit != null 
+    ? Number(billItem.water_latest_unit) 
+    : data.water_latest_unit;
+
+  return {
+    updateOne: {
+      filter: { _id: new mongoose.Types.ObjectId(data._id) },
+      update: {
+        $set: {
+          water_previous_unit: latestFromPayload >= data.water_previous_unit 
+            ? latestFromPayload 
+            : data.water_previous_unit,
+          water_latest_unit: null, // &lt;-- DESTROYS THE CURRENT READING POINTER!
+        },
+      },
+    },
+  };
+});
+await editMultipleFloorUnits(editFloorUnitsWaterReadingsBulkData);</code></pre>
+      </section>
+
+      <!-- 4. How Data Is Manipulated -->
+      <section id="mutation">
+        <h2>4. State Transformations & Edge-Case Mutations</h2>
+        <p>How the data gets modified during key lifecycle operations:</p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Operation</th>
+                <th>Target Collection</th>
+                <th>Mutation Logic</th>
+                <th>State Consequence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Entering Readings</strong></td>
+                <td><code>floorunits</code></td>
+                <td><code>$set: { water_latest_unit: value, water_previous_unit: value }</code></td>
+                <td>Mutates persistent unit record before bill cycle is created.</td>
+              </tr>
+              <tr>
+                <td><strong>Creating Draft Bill</strong></td>
+                <td><code>maintenances</code></td>
+                <td><code>insertMany([{ water_previous_unit, water_latest_unit, water_unit }])</code></td>
+                <td>Copies current scalar values from <code>floorunits</code> to new draft bill.</td>
+              </tr>
+              <tr>
+                <td><strong>Publishing Bill</strong></td>
+                <td><code>floorunits</code> & <code>maintenances</code></td>
+                <td><code>water_previous_unit = water_latest_unit</code><br><code>water_latest_unit = null</code></td>
+                <td><span class="pill pill-red">Irreversible</span> The latest reading is wiped, previous baseline is overwritten.</td>
+              </tr>
+              <tr>
+                <td><strong>Reset Water Units</strong></td>
+                <td><code>floorunits</code></td>
+                <td><code>water_previous_unit = 0</code><br><code>water_latest_unit = null</code><br><code>old_water_previous_unit.push(water_previous_unit)</code></td>
+                <td><span class="pill pill-orange">Opaque</span> Pushes old number into an untimestamped array. No meter or date audit.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The Reset Function Implementation</h3>
+        <p>Implemented in <a href="file:///Users/harshilmayani/Desktop/E Building/society-management-backend/src/modules/society/submodules/floorUnit/floorUnit.dao.js#L1493">floorUnit.dao.js line 1493</a>:</p>
+        <pre><code>module.exports.resetWaterUnits = async (floorUnitId) => {
+  return await FloorUnit.findOneAndUpdate(
+    { _id: floorUnitId },
+    [
+      {
+        $set: {
+          water_previous_unit: 0,
+          water_latest_unit: null,
+          old_water_previous_unit: {
+            $concatArrays: [
+              { $ifNull: ["$old_water_previous_unit", []] },
+              ["$water_previous_unit"],
+            ],
+          },
+        },
+      },
+    ],
+    { returnDocument: 'after' },
+  );
+};</code></pre>
+      </section>
+
+      <!-- 5. Complete API Catalog -->
+      <section id="apis">
+        <h2>5. Complete API Catalog</h2>
+        <p>All endpoints involved in the water meter and maintenance billing flow:</p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Route</th>
+                <th>Controller Method</th>
+                <th>Permissions</th>
+                <th>Role in Flow</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/floor-unit/:wing_id</code></td>
+                <td><code>getFloorUnitsFromWingId</code></td>
+                <td>Access Token</td>
+                <td>Fetches flats with current <code>water_previous_unit</code> & <code>water_latest_unit</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-put">PUT</span></td>
+                <td><code>/society/floor-unit/edit-floor-units</code></td>
+                <td><code>editFloorsData</code></td>
+                <td>Access Token</td>
+                <td>Bulk updates flat records with new meter readings.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-put">PUT</span></td>
+                <td><code>/society/floor-unit/edit-floor-unit/:floor_id</code></td>
+                <td><code>editFloorUnitByFloorId</code></td>
+                <td>Access Token</td>
+                <td>Single-flat update for meter reading.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-put">PUT</span></td>
+                <td><code>/society/floor-unit/reset-water-units/:floor_unit_id</code></td>
+                <td><code>resetWaterUnits</code></td>
+                <td>WATER_METER_READINGS: UPDATE</td>
+                <td>Resets flat meter reading to 0 and stores old reading in array.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-post">POST</span></td>
+                <td><code>/society/maintenance/create/:society_id</code></td>
+                <td><code>createMaintenanceBillFromSocietyId</code></td>
+                <td>MAINTENANCE_BILLS: CREATE</td>
+                <td>Initializes draft bill cycle and copies readings to <code>maintenances</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-put">PUT</span></td>
+                <td><code>/society/maintenance/create-bulk-maintenance-bills/:id</code></td>
+                <td><code>createBulkMaintenanceBills</code></td>
+                <td>MAINTENANCE_BILLS: CREATE</td>
+                <td>Publishes bills, advances <code>water_previous_unit</code>, clears <code>water_latest_unit</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/maintenance/get-admin-maintenance-bills/:society_id</code></td>
+                <td><code>getAdminMaintenanceBills</code></td>
+                <td>MAINTENANCE_BILLS: VIEW</td>
+                <td>Admin listing of all billing cycles.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/maintenance/get-all-wings-maintanance-bills/maintenance/:id</code></td>
+                <td><code>getMaintenanceBillFromWingId</code></td>
+                <td>MAINTENANCE_BILLS: VIEW</td>
+                <td>Fetches wing-wise bills for review.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/maintenance/get-login-user-water-bill/:society_id/:floor_unit_id</code></td>
+                <td><code>getLoginUserWaterBill</code></td>
+                <td>Access Token</td>
+                <td>Member view of their water consumption and cost over time.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/reports/get-water-meter-collection-report/:society_id</code></td>
+                <td><code>getWaterMeterCollectionReport</code></td>
+                <td>REPORTS: VIEW</td>
+                <td>Summary of billed vs collected water charges.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/reports/get-water-meter-collection-report-drilldown/:society_id</code></td>
+                <td><code>getWaterMeterCollectionReportDrilldown</code></td>
+                <td>REPORTS: VIEW</td>
+                <td>Flat-by-flat drilldown for Excel and PDF exports.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 6. History & Retention Analysis -->
+      <section id="retention">
+        <h2>6. How Many Months of Old Units Are Stored?</h2>
+        
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <div class="callout-title">Critical Insight: Zero History on Floor Units</div>
+            The master flat record (<code>FloorUnit</code>) maintains <strong>no monthly history whatsoever</strong>. It is strictly a current-state pointer.
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Storage Layer</th>
+                <th>Retention Depth</th>
+                <th>Structure</th>
+                <th>Queryable As Time Series?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong><code>floorunits</code></strong> (Master Flat Record)</td>
+                <td><span class="pill pill-red">1 Billing Cycle</span></td>
+                <td>Only <code>water_previous_unit</code> and temporary <code>water_latest_unit</code>.</td>
+                <td><strong>No.</strong> No dates, no timestamps, no monthly fields.</td>
+              </tr>
+              <tr>
+                <td><strong><code>old_water_previous_unit</code></strong> (Inside <code>floorunits</code>)</td>
+                <td><span class="pill pill-orange">Event-based only</span></td>
+                <td>Array of raw numbers (<code>[120, 240]</code>) appended only when manual meter reset is invoked.</td>
+                <td><strong>No.</strong> Untimestamped, unindexed, never read by frontend.</td>
+              </tr>
+              <tr>
+                <td><strong><code>maintenances</code></strong> (Billing Cycle Records)</td>
+                <td><span class="pill pill-green">Indefinite (All Past Bills)</span></td>
+                <td>Each document contains <code>water_previous_unit</code>, <code>water_latest_unit</code>, <code>water_unit</code>, and cycle dates.</td>
+                <td><strong>Partially.</strong> Can only be reconstructed by aggregating the entire maintenance bills collection. If a month had no bill created, no reading exists.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 7. 10 Critical Flaws & Cons -->
+      <section id="flaws">
+        <h2>7. Critical Limitations, Bottlenecks & Flaws (The Cons)</h2>
+        <p>The 10 major architectural, data consistency, and user experience flaws in the current implementation:</p>
+
+        <div class="flaws-grid">
+          
+          <!-- Flaw 1 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">1</div>
+              <div class="flaw-title">Destructive State Overwrite</div>
+            </div>
+            <span class="flaw-impact impact-critical">Critical Integrity Risk</span>
+            <div class="flaw-description">
+              When a bill is published, <code>water_latest_unit</code> is wiped to <code>null</code>, and <code>water_previous_unit</code> is overwritten with the latest reading. If the admin notices a typo right after publishing, the original baseline reading is permanently destroyed from <code>floorunits</code>.
+            </div>
+            <div class="flaw-code">
+              <code>maintenance.service.js:L341</code>: <code>water_previous_unit: latestFromPayload, water_latest_unit: null</code>
+            </div>
+          </div>
+
+          <!-- Flaw 2 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">2</div>
+              <div class="flaw-title">Premature Master Mutation</div>
+            </div>
+            <span class="flaw-impact impact-critical">Critical Integrity Risk</span>
+            <div class="flaw-description">
+              Entering readings immediately mutates the master <code>floorunits</code> document before a bill cycle is even confirmed. If the admin abandons the flow halfway, unbilled dirty readings remain permanently stored on the flat.
+            </div>
+            <div class="flaw-code">
+              <code>create-water-bill.tsx:L246</code>: Directly calls <code>PUT /society/floor-unit/edit-floor-units</code>
+            </div>
+          </div>
+
+          <!-- Flaw 3 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">3</div>
+              <div class="flaw-title">No Physical Meter Entity</div>
+            </div>
+            <span class="flaw-impact impact-high">Architecture Flaw</span>
+            <div class="flaw-description">
+              Meters are equated directly to flats (Flat &equiv; Meter). The system cannot handle meter serial numbers, meter replacements, installation dates, or flats with multiple meters (e.g. domestic vs flushing lines, commercial units).
+            </div>
+            <div class="flaw-code">
+              No <code>Meter</code> or <code>WaterMeter</code> schema exists in the entire backend.
+            </div>
+          </div>
+
+          <!-- Flaw 4 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">4</div>
+              <div class="flaw-title">Calculation Inconsistency</div>
+            </div>
+            <span class="flaw-impact impact-high">Financial Discrepancy</span>
+            <div class="flaw-description">
+              The backend draft creation calculates <code>water_unit = Math.max(latest - previous, 0)</code> and <strong>completely ignores minimum_water_unit</strong>. Only the frontend applies the minimum. If a bill is generated via automated cron or API, the minimum threshold is bypassed!
+            </div>
+            <div class="flaw-code">
+              Backend: <code>maintenance.service.js:L137</code> vs Frontend: <code>create-edit-regular-bill.tsx:L52</code>
+            </div>
+          </div>
+
+          <!-- Flaw 5 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">5</div>
+              <div class="flaw-title">Opaque & Untracked Reset</div>
+            </div>
+            <span class="flaw-impact impact-high">Audit Blindspot</span>
+            <div class="flaw-description">
+              The "Reset Water Meter" function pushes the previous reading into an untimestamped array (<code>old_water_previous_unit</code>). It stores no record of <em>who</em> reset it, <em>when</em>, <em>why</em>, or what meter it was.
+            </div>
+            <div class="flaw-code">
+              <code>floorUnit.dao.js:L1502</code>: <code>$concatArrays: ["$old_water_previous_unit", ["$water_previous_unit"]]</code>
+            </div>
+          </div>
+
+          <!-- Flaw 6 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">6</div>
+              <div class="flaw-title">Read-Only Final Bill Screen</div>
+            </div>
+            <span class="flaw-impact impact-high">UX Bottleneck</span>
+            <div class="flaw-description">
+              On the final bill review screen (<code>/create-maintenance-bill</code>), water meter readings are completely read-only. If an admin spots an erroneous reading on Flat 402, they cannot fix it inline; they must discard the entire bill and start over.
+            </div>
+            <div class="flaw-code">
+              <code>create-edit-regular-bill.tsx:L1633-1643</code>: Static label rendering only.
+            </div>
+          </div>
+
+          <!-- Flaw 7 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">7</div>
+              <div class="flaw-title">No Photo Proof or Verification</div>
+            </div>
+            <span class="flaw-impact impact-medium">Dispute Risk</span>
+            <div class="flaw-description">
+              Staff or guards entering meter readings cannot upload a photo of the physical meter dial. When residents contest high water charges, society admins have zero visual proof or audit evidence.
+            </div>
+            <div class="flaw-code">
+              No image upload or media reference exists in water meter endpoints.
+            </div>
+          </div>
+
+          <!-- Flaw 8 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">8</div>
+              <div class="flaw-title">Rollover & Negative Rejection</div>
+            </div>
+            <span class="flaw-impact impact-medium">Operational Blocker</span>
+            <div class="flaw-description">
+              The only validation is <code>latest >= previous</code>. When a mechanical meter reaches its maximum (e.g. 99,999) and rolls over to 00,005, the UI treats it as a negative reading error and blocks bill generation.
+            </div>
+            <div class="flaw-code">
+              <code>create-water-bill.tsx:L99</code>: <code>setNegative(prev => ({ ...prev, [floorId]: prevVal > numericVal }))</code>
+            </div>
+          </div>
+
+          <!-- Flaw 9 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">9</div>
+              <div class="flaw-title">No Anomaly / Spike Warning</div>
+            </div>
+            <span class="flaw-impact impact-medium">Typo Vulnerability</span>
+            <div class="flaw-description">
+              There is no historical baseline check. If a resident whose typical consumption is 40 units has 4,000 units entered due to a keyboard typo or severe water leak, the system calculates a massive bill with zero warning or confirmation prompt.
+            </div>
+            <div class="flaw-code">
+              Zero outlier detection or standard-deviation checks in backend or frontend.
+            </div>
+          </div>
+
+          <!-- Flaw 10 -->
+          <div class="flaw-card">
+            <div class="flaw-header">
+              <div class="flaw-number">10</div>
+              <div class="flaw-title">Fragmented 4-Step Navigation</div>
+            </div>
+            <span class="flaw-impact impact-medium">Friction & Drop-off</span>
+            <div class="flaw-description">
+              Admin workflow is split across four distinct URL routes (<code>/water-meter-reading</code> &rarr; <code>/water-create-bill</code> &rarr; <code>/duration-maintenance-bill</code> &rarr; <code>/create-maintenance-bill</code>). Navigating away leaves partially saved wing states.
+            </div>
+            <div class="flaw-code">
+              State passed through URL params and React Router navigation state.
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 8. Recommendations for PRD -->
+      <section id="prd-recommendations">
+        <h2>8. Key Recommendations for the New Flow (PRD Input)</h2>
+        
+        <div class="callout success">
+          <div class="callout-icon">🚀</div>
+          <div class="callout-content">
+            <div class="callout-title">Foundation for the New PRD</div>
+            The new flow should decouple meter management from maintenance billing while providing a unified, auditable, and resilient reading lifecycle.
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Current State</th>
+                <th>Proposed PRD Solution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Data Entity</strong></td>
+                <td>Flat fields on <code>FloorUnit</code></td>
+                <td>Dedicated <code>WaterMeter</code> model (meter number, type, installation date, flat link, status).</td>
+              </tr>
+              <tr>
+                <td><strong>Readings Model</strong></td>
+                <td>Scalar fields overwritten on publish</td>
+                <td>Dedicated <code>WaterMeterReading</code> time-series collection (reading value, reading date, photo evidence URL, recorded_by, bill_cycle_id).</td>
+              </tr>
+              <tr>
+                <td><strong>Photo Proof</strong></td>
+                <td>None</td>
+                <td>Optional/mandatory meter dial photo upload via camera/gallery in mobile and web.</td>
+              </tr>
+              <tr>
+                <td><strong>Calculation</strong></td>
+                <td>Mismatched between frontend & backend</td>
+                <td>Centralized calculation service applying tiered tariffs, minimum threshold, and rollover math.</td>
+              </tr>
+              <tr>
+                <td><strong>Inline Editing</strong></td>
+                <td>Read-only during bill review</td>
+                <td>Allow inline correction of meter readings directly on the draft maintenance bill review screen.</td>
+              </tr>
+              <tr>
+                <td><strong>Anomaly Detection</strong></td>
+                <td>None</td>
+                <td>Flag readings that deviate &gt;200% from previous 3-month average with an "Unusual Spike" confirmation modal.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    Water Meter Flow Technical Analysis &bull; E Building Society Management System &bull; Generated September 2026
+  </footer>
+
+</body>
+</html>

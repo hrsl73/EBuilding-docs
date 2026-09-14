@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRD - Water Readings &amp; Maintenance Billing Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      themeVariables: {
+        primaryColor: '#2563eb',
+        primaryTextColor: '#1e293b',
+        primaryBorderColor: '#93c5fd',
+        lineColor: '#3b82f6',
+        secondaryColor: '#f8fafc',
+        tertiaryColor: '#ffffff'
+      }
+    });
+  </script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --secondary: #64748b;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --border-card: #e2e8f0;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --warning-border: #fde68a;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --success-border: #a7f3d0;
+      --info: #0ea5e9;
+      --info-light: #f0f9ff;
+      --info-border: #bae6fd;
+      --code-bg: #1e293b;
+      --code-text: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding: 0;
+      margin: 0;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 48px 32px;
+      border-bottom: 4px solid var(--primary);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .badge-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(147, 197, 253, 0.4);
+      color: #93c5fd;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: #94a3b8;
+      max-width: 850px;
+      line-height: 1.55;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.875rem;
+      color: #cbd5e1;
+    }
+
+    .meta-item strong { color: white; }
+
+    .main-layout {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 24px 64px 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 36px;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .toc-sidebar { display: none; }
+    }
+
+    .toc-sidebar {
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--secondary);
+      margin-bottom: 16px;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .toc-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: block;
+    }
+
+    .toc-list a:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .content-area { min-width: 0; }
+
+    section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h3 {
+      font-size: 1.22rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 24px 0 12px 0;
+    }
+
+    h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #334155;
+      margin: 16px 0 8px 0;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 0.975rem;
+      margin-bottom: 16px;
+    }
+
+    .diagram-container {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin: 20px 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    thead { background: #f1f5f9; }
+
+    th {
+      padding: 12px 16px;
+      font-weight: 700;
+      color: #334155;
+      border-bottom: 1px solid var(--border-card);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    pre code { background: transparent; color: inherit; padding: 0; border: none; }
+
+    .callout {
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      font-size: 0.95rem;
+    }
+
+    .callout-icon { font-size: 1.4rem; line-height: 1; }
+    .callout-content { flex: 1; }
+    .callout-title { font-weight: 700; margin-bottom: 4px; }
+
+    .callout.danger { background: var(--danger-light); border: 1px solid var(--danger-border); color: #991b1b; }
+    .callout.danger .callout-title { color: #b91c1c; }
+
+    .callout.warning { background: var(--warning-light); border: 1px solid var(--warning-border); color: #92400e; }
+    .callout.warning .callout-title { color: #b45309; }
+
+    .callout.info { background: var(--info-light); border: 1px solid var(--info-border); color: #075985; }
+    .callout.info .callout-title { color: #0284c7; }
+
+    .callout.success { background: var(--success-light); border: 1px solid var(--success-border); color: #065f46; }
+    .callout.success .callout-title { color: #059669; }
+
+    .method-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+    .method-get { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .method-post { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .method-put { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .method-delete { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .pill-blue { background: #dbeafe; color: #1d4ed8; }
+    .pill-green { background: #dcfce7; color: #15803d; }
+    .pill-red { background: #fee2e2; color: #b91c1c; }
+    .pill-amber { background: #fef3c7; color: #b45309; }
+    .pill-gray { background: #f1f5f9; color: #475569; }
+
+    .step-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      display: flex;
+      gap: 16px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .step-body { flex: 1; }
+    .step-title { font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--secondary);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-card);
+      background: white;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="badge-header">🎯 Product Requirement Document &amp; Technical Architecture</div>
+      <h1>Water Readings Flow in Maintenance Billing</h1>
+      <div class="subtitle">
+        A unified, resilient billing architecture integrating water meter readings directly within the maintenance billing wizard, backed by a dedicated <code>waterreadings</code> collection, smart reading recovery on bill deletion, and inline editing.
+      </div>
+      <div class="meta-bar">
+        <div class="meta-item"><strong>Document Type:</strong> Product Requirement Document (PRD)</div>
+        <div class="meta-item"><strong>Target Modules:</strong> Maintenance Billing &amp; Water Unit Management</div>
+        <div class="meta-item"><strong>Target Repositories:</strong> society-management-backend &amp; society-management-frontend</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    
+    <aside class="toc-sidebar">
+      <div class="toc-title">📑 PRD Contents</div>
+      <ul class="toc-list">
+        <li><a href="#overview">1. Executive Summary &amp; Objectives</a></li>
+        <li><a href="#ui-flow">2. End-to-End User Experience &amp; Flow</a></li>
+        <li><a href="#schema">3. DB Architecture &amp; Class Diagram</a></li>
+        <li><a href="#smart-recovery">4. Smart Recovery &amp; Deletion Flow</a></li>
+        <li><a href="#inline-editing">5. Inline Editing in Bill Review</a></li>
+        <li><a href="#business-rules">6. Business Rules &amp; Calculations</a></li>
+        <li><a href="#apis">7. Dedicated API Specifications</a></li>
+        <li><a href="#history">8. Month-Wise History Access</a></li>
+        <li><a href="#migration">9. Backward Compatibility &amp; Migration</a></li>
+        <li><a href="#folder-architecture">10. Proposed Folder Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+
+      <!-- 1. Executive Summary & Objectives -->
+      <section id="overview">
+        <h2>1. Executive Summary &amp; Core Objectives</h2>
+        <p>
+          Water meter billing is a vital recurring component of society maintenance bills. In society operations, maintenance bills often undergo updates, revisions, or deletions before final payments are collected. This PRD establishes a robust, resilient flow where water readings are entered directly within maintenance bill creation and preserved safely across bill edits and deletions.
+        </p>
+
+        <div class="callout info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Core Architecture Principles</div>
+            <ul style="margin-top: 6px; padding-left: 18px;">
+              <li><strong>Readings Only (No Physical Meter Entity):</strong> We focus strictly on recording flat-wise numerical readings (Previous &amp; Current). No complex hardware meter entities.</li>
+              <li><strong>Unified In-Flow Wizard:</strong> Water readings entry is an integrated step inside the Maintenance Bill creation wizard, not an isolated external screen.</li>
+              <li><strong>Dedicated <code>waterreadings</code> Collection:</strong> Master flat records (<code>floorunits</code>) are never mutated or overwritten. Every reading belongs to its billing cycle.</li>
+              <li><strong>Smart Reading Recovery:</strong> Deleting a maintenance bill cycle does not destroy recorded water readings. Re-generating the bill for that month detects existing readings and offers instant restoration.</li>
+              <li><strong>Inline Table Editing:</strong> Admins can edit water readings directly in the maintenance review table with live recalculation of water charges and flat totals.</li>
+              <li><strong>Open Units Only:</strong> Only occupied/open flats (<code>owner</code>, <code>rent</code>, <code>shop</code>) are eligible for water units. Closed flats (<code>closed</code>) are strictly excluded (₹0 charge).</li>
+              <li><strong>Dedicated Clean APIs:</strong> Replaces legacy <code>floorUnit</code> mutations with dedicated <code>/society/water-reading/*</code> endpoints.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. End-to-End User Experience & Flow -->
+      <section id="ui-flow">
+        <h2>2. End-to-End User Experience &amp; Flow</h2>
+        <p>
+          The water readings entry is integrated directly into the Maintenance Bill creation flow:
+        </p>
+
+        <div class="diagram-container">
+          <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant UI_Dur as Web: Duration Selection
+    participant UI_Water as Web: Water Readings Step
+    participant UI_Review as Web: Review & Finalize Table
+    participant Backend as Express API
+    participant DB as MongoDB
+
+    Admin->>UI_Dur: 1. Select Start Month, End Month, Due Date
+    Admin->>UI_Dur: 2. Click "Next"
+    UI_Dur->>Backend: POST /society/maintenance/create/:society_id
+    Backend->>DB: Creates AdminMaintenance cycle (is_draft = true)
+    Backend-->>UI_Dur: Returns admin_maintenance_id
+
+    UI_Dur->>UI_Water: 3. Advances to Water Reading Step for this cycle
+    UI_Water->>Backend: GET /society/water-reading/get-readings/:admin_maintenance_id
+    Backend-->>UI_Water: Returns units with pre-populated baseline readings
+    Admin->>UI_Water: 4. Enter Current Readings wing-by-wing
+    Admin->>UI_Water: 5. Click "Proceed to Review"
+    UI_Water->>Backend: PUT /society/water-reading/bulk-update/:admin_maintenance_id
+    Backend->>DB: Saves water readings tied to this maintenance_id
+
+    UI_Water->>UI_Review: 6. Navigates to Maintenance Bill Review Table
+    Admin->>UI_Review: 7. Review flat totals (can edit water readings inline!)
+    Admin->>UI_Review: 8. Click "Publish Bills"
+    UI_Review->>Backend: PUT /society/maintenance/create-bulk-maintenance-bills/:admin_maintenance_id
+    Backend->>DB: Finalizes bills and readings (is_draft = false)
+    Backend-->>Admin: Bills Published & Members Notified!
+          </div>
+        </div>
+
+        <h3>Wizard Steps Breakdown</h3>
+
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Step 1: Duration Selection (<code>/duration-maintenance-bill/:societyId</code>)</div>
+            <div class="step-desc">
+              Admin selects billing months (e.g., August 2026) and due date. On clicking "Next", the backend initializes an <code>AdminMaintenance</code> draft cycle and returns its <code>admin_maintenance_id</code>.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Step 2: Water Readings Entry (Integrated Wizard Step)</div>
+            <div class="step-desc">
+              If the society has water meter pricing enabled (<code>water_price_per_unit &gt; 0</code>), the wizard displays the Water Unit Entry step for this cycle:
+              <ul style="margin-top: 6px; padding-left: 18px;">
+                <li>Closed flats show as <span class="pill pill-red">Closed</span> and are disabled.</li>
+                <li>Open flats display their <code>Previous Reading</code> (automatically resolved from the latest valid cycle).</li>
+                <li>Admin enters <code>Current Reading</code> wing by wing. Consumed units are calculated live.</li>
+                <li>Admin clicks "Proceed to Review" &rarr; readings are saved to <code>waterreadings</code> linked to this <code>maintenance_id</code>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Step 3: Review &amp; Inline Editing (<code>/create-maintenance-bill/:societyId/:id</code>)</div>
+            <div class="step-desc">
+              Admin reviews all flats in a summary table. In this table, the water reading column is an <strong>editable inline input</strong>. Modifying a reading instantly recalculates consumed units, water charges, and the flat's total bill live.
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Step 4: Publish Bills</div>
+            <div class="step-desc">
+              Admin clicks "Publish". The maintenance bills and water readings are finalized (<code>is_draft: false</code>). Push notifications and bill breakdowns are dispatched to residents.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Database Architecture & Schema -->
+      <section id="schema">
+        <h2>3. Database Level Architecture &amp; Class Diagram</h2>
+        <p>
+          The database level architecture models the persistence layer across MongoDB collections, defining entities, their attributes, structural relationships, and access operations for every stage of the billing lifecycle.
+        </p>
+
+        <h3>3.1 Database Architecture Class Diagram</h3>
+        <p>
+          Below is the class diagram showing the core MongoDB schemas, data types, cross-collection references, and the specific database access methods responsible for reading and writing data across operations:
+        </p>
+
+        <div class="diagram-container">
+          <div class="mermaid">
+classDiagram
+    direction TB
+    class Society {
+        +ObjectId _id
+        +String name
+        +Number water_price_per_unit
+        +Number minimum_water_unit
+        +Boolean is_auto_bill_generation_enabled
+        +getWaterConfig(societyId)
+    }
+    class Wing {
+        +ObjectId _id
+        +ObjectId society_id
+        +String name
+        +getWingsBySociety(societyId)
+    }
+    class FloorUnit {
+        +ObjectId _id
+        +ObjectId society_id
+        +ObjectId wing_id
+        +String house_no
+        +String type
+        +Number water_previous_unit
+        +getUnitsByWing(wingId)
+    }
+    class AdminMaintenance {
+        +ObjectId _id
+        +ObjectId society
+        +Date start_month
+        +Date end_month
+        +Date due_date
+        +String status
+        +String bill_type
+        +Boolean is_draft
+        +Boolean is_deleted
+        +createCycle(societyId, payload)
+        +publishCycle(adminMaintenanceId)
+        +softDeleteCycle(adminMaintenanceId)
+    }
+    class Maintenance {
+        +ObjectId _id
+        +ObjectId admin_maintainence_id
+        +ObjectId floor_unit_id
+        +ObjectId society_id
+        +Date start_month
+        +Date end_month
+        +Number maintenance_bill_amount
+        +Number water_previous_unit
+        +Number water_latest_unit
+        +Number water_unit
+        +Number water_unit_price
+        +Number total_bill_amount
+        +Boolean is_draft
+        +String status
+        +Boolean is_deleted
+        +createDraftBills(adminMaintenanceId)
+        +bulkUpdateBills(adminMaintenanceId, payload)
+        +softDeleteBills(adminMaintenanceId)
+    }
+    class WaterReading {
+        +ObjectId _id
+        +ObjectId society_id
+        +ObjectId wing_id
+        +ObjectId floor_unit_id
+        +ObjectId maintenance_id
+        +Date start_month
+        +Date end_month
+        +Number previous_reading
+        +Number current_reading
+        +Number consumed_unit
+        +Number unit_price
+        +Number water_amount
+        +String status
+        +Boolean is_deleted
+        +ObjectId created_by
+        +getBaselineReading(floorUnitId, startMonth)
+        +getReadingsByCycle(maintenanceId)
+        +bulkUpdateReadings(maintenanceId, readings)
+        +findDetachedReadings(societyId, startMonth)
+        +restoreDetachedReadings(newMaintenanceId)
+        +detachReadings(maintenanceId)
+        +getHistory(floorUnitId, limit)
+    }
+
+    Society "1" --> "*" Wing : contains
+    Society "1" --> "*" FloorUnit : contains
+    Society "1" --> "*" AdminMaintenance : schedules
+    Society "1" --> "*" WaterReading : owns
+    Wing "1" --> "*" FloorUnit : groups
+    AdminMaintenance "1" --> "*" Maintenance : generates
+    AdminMaintenance "1" --> "*" WaterReading : links parallel cycle
+    FloorUnit "1" --> "*" Maintenance : billed for
+    FloorUnit "1" --> "*" WaterReading : measured for
+          </div>
+        </div>
+
+        <h3>3.2 Database Operations &amp; Data Access Matrix</h3>
+        <p>
+          This matrix explicitly details <strong>where data resides</strong>, <strong>which collections are read</strong>, and <strong>which collections are modified</strong> for every database-driven operation across the billing lifecycle:
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Operation</th>
+                <th>Trigger / Wizard Step</th>
+                <th>Collections Read</th>
+                <th>Collections Modified / Written</th>
+                <th>Data Access Mechanism &amp; State Changes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. Initiate Billing Cycle</strong></td>
+                <td>Step 1: Duration Selection (<code>/duration-maintenance-bill</code>)</td>
+                <td><code>societies</code>, <code>floorunits</code></td>
+                <td><code>adminmaintenances</code>, <code>maintenances</code></td>
+                <td>
+                  &bull; Reads active open flats and society settings.<br>
+                  &bull; Inserts <code>AdminMaintenance</code> (<code>is_draft: true</code>).<br>
+                  &bull; Inserts draft <code>Maintenance</code> bills for all flats.<br>
+                  &bull; <span class="pill pill-green">Zero FloorUnit Mutations</span>: Does not touch master flats.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>2. Load Water Entry Sheet</strong></td>
+                <td>Step 2: Water Readings Entry</td>
+                <td><code>wings</code>, <code>floorunits</code>, <code>waterreadings</code></td>
+                <td><em>None (Read-Only)</em></td>
+                <td>
+                  &bull; Reads flats filtered by <code>type !== 'closed'</code>.<br>
+                  &bull; For each flat, queries <code>waterreadings</code> for latest active reading before <code>start_month</code> (falls back to <code>floorUnit.water_previous_unit</code> if legacy).<br>
+                  &bull; Pre-populates baseline previous readings in UI.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>3. Save Cycle Readings</strong></td>
+                <td>Step 2: Click "Proceed to Review"</td>
+                <td><code>adminmaintenances</code>, <code>societies</code></td>
+                <td><code>waterreadings</code></td>
+                <td>
+                  &bull; Validates draft cycle exists.<br>
+                  &bull; Reads <code>water_price_per_unit</code> &amp; <code>minimum_water_unit</code>.<br>
+                  &bull; Bulk upserts documents in <code>waterreadings</code> linked to <code>maintenance_id</code> with <code>status: 'draft'</code>.<br>
+                  &bull; Calculates <code>consumed_unit = max(min_unit, curr - prev)</code> and <code>water_amount</code>.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>4. Load Bill Review Table</strong></td>
+                <td>Step 3: Review Screen (<code>/create-maintenance-bill</code>)</td>
+                <td><code>adminmaintenances</code>, <code>maintenances</code>, <code>waterreadings</code></td>
+                <td><em>None (Read-Only)</em></td>
+                <td>
+                  &bull; Reads draft bills and merges corresponding <code>waterreadings</code> by <code>floor_unit_id</code>.<br>
+                  &bull; Renders interactive table with flat maintenance + water charges.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>5. Inline Reading Edit</strong></td>
+                <td>Step 3: Admin changes reading cell</td>
+                <td><code>societies</code></td>
+                <td><code>waterreadings</code>, <code>maintenances</code></td>
+                <td>
+                  &bull; Updates <code>current_reading</code> in <code>waterreadings</code>.<br>
+                  &bull; Recalculates <code>consumed_unit</code> and <code>water_amount</code>.<br>
+                  &bull; Updates <code>Maintenance</code> bill total in memory and DB.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>6. Publish Bills</strong></td>
+                <td>Step 4: Click "Publish Bills"</td>
+                <td><code>adminmaintenances</code>, <code>maintenances</code>, <code>waterreadings</code></td>
+                <td><code>adminmaintenances</code>, <code>maintenances</code>, <code>waterreadings</code></td>
+                <td>
+                  &bull; Sets <code>AdminMaintenance.is_draft = false</code>.<br>
+                  &bull; Sets <code>Maintenance.is_draft = false</code>.<br>
+                  &bull; Sets <code>WaterReading.status = 'billed'</code>.<br>
+                  &bull; <span class="pill pill-green">Safe Isolation</span>: Master <code>floorunits</code> is NEVER wiped or shifted forward.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>7. Delete Bill Cycle</strong></td>
+                <td>Admin clicks "Delete Bill"</td>
+                <td><code>adminmaintenances</code>, <code>maintenances</code></td>
+                <td><code>adminmaintenances</code>, <code>maintenances</code>, <code>waterreadings</code></td>
+                <td>
+                  &bull; Checks no payments made.<br>
+                  &bull; Sets <code>AdminMaintenance.is_deleted = true</code>.<br>
+                  &bull; Sets <code>Maintenance.is_deleted = true</code>.<br>
+                  &bull; Sets <code>WaterReading.status = 'detached'</code> and <code>maintenance_id = null</code> (readings preserved for smart recovery).
+                </td>
+              </tr>
+              <tr>
+                <td><strong>8. Smart Recovery Check</strong></td>
+                <td>Step 1 &rarr; Step 2 transition for same month</td>
+                <td><code>waterreadings</code></td>
+                <td><em>None (Read-Only)</em></td>
+                <td>
+                  &bull; Queries <code>waterreadings.find({ society_id, start_month, status: 'detached', is_deleted: false })</code>.<br>
+                  &bull; If found, triggers UI prompt to restore readings.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>9. Restore Detached Readings</strong></td>
+                <td>Admin clicks "Use Saved Readings"</td>
+                <td><code>waterreadings</code></td>
+                <td><code>waterreadings</code></td>
+                <td>
+                  &bull; Updates detached records: <code>maintenance_id = new_maintenance_id, status = 'draft'</code>.<br>
+                  &bull; Re-links entire batch with zero manual data entry.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>10. Discard &amp; Start Fresh</strong></td>
+                <td>Admin clicks "Start Fresh"</td>
+                <td><code>waterreadings</code></td>
+                <td><code>waterreadings</code></td>
+                <td>
+                  &bull; Sets detached records to <code>is_deleted: true</code>.<br>
+                  &bull; System pulls baseline previous reading from preceding cycle.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>11. Query Historical Usage</strong></td>
+                <td>Member bill modal / Admin flat audit</td>
+                <td><code>waterreadings</code></td>
+                <td><em>None (Read-Only)</em></td>
+                <td>
+                  &bull; Queries <code>waterreadings.find({ floor_unit_id, is_deleted: false }).sort({ start_month: -1 }).limit(3)</code>.<br>
+                  &bull; Returns 2–3 months of usage for trend comparison.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>3.3 Database Collection Schema: <code>waterreadings</code></h3>
+        <p>
+          Every reading document is linked directly to the parent maintenance billing cycle (<code>maintenance_id</code>). We store a single, unambiguous <strong><code>consumed_unit</code></strong> field.
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Field Name</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>_id</code></td>
+                <td><code>ObjectId</code></td>
+                <td>Yes</td>
+                <td>Default MongoDB ObjectId.</td>
+              </tr>
+              <tr>
+                <td><code>society_id</code></td>
+                <td><code>ObjectId</code> (ref: "Society")</td>
+                <td>Yes</td>
+                <td>Reference to the Society.</td>
+              </tr>
+              <tr>
+                <td><code>wing_id</code></td>
+                <td><code>ObjectId</code> (ref: "Wing")</td>
+                <td>Yes</td>
+                <td>Reference to the Wing.</td>
+              </tr>
+              <tr>
+                <td><code>floor_unit_id</code></td>
+                <td><code>ObjectId</code> (ref: "floorUnit")</td>
+                <td>Yes</td>
+                <td>Reference to the Flat Unit.</td>
+              </tr>
+              <tr>
+                <td><code>maintenance_id</code></td>
+                <td><code>ObjectId</code> (ref: "AdminMaintenance")</td>
+                <td>No</td>
+                <td>Links reading directly to the maintenance billing cycle. Set to <code>null</code> if bill is deleted (detached state).</td>
+              </tr>
+              <tr>
+                <td><code>start_month</code></td>
+                <td><code>Date</code></td>
+                <td>Yes</td>
+                <td>Billing cycle start month (e.g., <code>2026-08-01T00:00:00.000Z</code>). Used for chronological querying.</td>
+              </tr>
+              <tr>
+                <td><code>end_month</code></td>
+                <td><code>Date</code></td>
+                <td>Yes</td>
+                <td>Billing cycle end month.</td>
+              </tr>
+              <tr>
+                <td><code>previous_reading</code></td>
+                <td><code>Number</code></td>
+                <td>Yes</td>
+                <td>Baseline reading from preceding cycle (e.g. 150).</td>
+              </tr>
+              <tr>
+                <td><code>current_reading</code></td>
+                <td><code>Number</code></td>
+                <td>Yes</td>
+                <td>Current recorded reading for this cycle (e.g. 195).</td>
+              </tr>
+              <tr>
+                <td><code>consumed_unit</code></td>
+                <td><code>Number</code></td>
+                <td>Yes</td>
+                <td>Chargeable units: <code>max(minimum_water_unit, current_reading - previous_reading)</code>.</td>
+              </tr>
+              <tr>
+                <td><code>unit_price</code></td>
+                <td><code>Number</code></td>
+                <td>Yes</td>
+                <td>Snapshot of society's rate per unit applied to this bill.</td>
+              </tr>
+              <tr>
+                <td><code>water_amount</code></td>
+                <td><code>Number</code></td>
+                <td>Yes</td>
+                <td>Total water cost: <code>consumed_unit * unit_price</code>.</td>
+              </tr>
+              <tr>
+                <td><code>status</code></td>
+                <td><code>String</code></td>
+                <td>Yes</td>
+                <td>
+                  Enum: <code>["draft", "billed", "detached"]</code>.<br>
+                  &bull; <code>draft</code>: In review.<br>
+                  &bull; <code>billed</code>: Published.<br>
+                  &bull; <code>detached</code>: Parent bill was deleted; preserved for smart recovery.
+                </td>
+              </tr>
+              <tr>
+                <td><code>is_deleted</code></td>
+                <td><code>Boolean</code></td>
+                <td>No (default: false)</td>
+                <td>Soft-delete flag. Set to <code>true</code> only if admin explicitly discards detached readings.</td>
+              </tr>
+              <tr>
+                <td><code>created_by</code></td>
+                <td><code>ObjectId</code> (ref: "User")</td>
+                <td>Yes</td>
+                <td>Admin User ID who recorded/edited the reading.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Database Indexes</h3>
+        <pre><code>// 1. History query index (fast lookups of past readings for a flat)
+waterReadingSchema.index({ floor_unit_id: 1, is_deleted: 1, start_month: -1 });
+
+// 2. Billing cycle fetch index
+waterReadingSchema.index({ maintenance_id: 1, is_deleted: 1 });
+
+// 3. Uniqueness index per flat per active billing cycle
+waterReadingSchema.index({ maintenance_id: 1, floor_unit_id: 1, is_deleted: 1 });
+
+// 4. Month-matching lookup index for smart recovery
+waterReadingSchema.index({ society_id: 1, start_month: 1, is_deleted: 1 });</code></pre>
+      </section>
+
+      <!-- 4. Smart Recovery & Deletion Flow -->
+      <section id="smart-recovery">
+        <h2>4. Smart Reading Recovery on Bill Deletion &amp; Recreation</h2>
+        <p>
+          In typical operations, an admin might delete a published maintenance bill to fix a due date, revise an additional expense, or correct general billing settings. They should not be forced to re-type 100+ water meter readings from scratch.
+        </p>
+
+        <div class="diagram-container">
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> Draft: 1. Readings entered for August
+    Draft --> Billed: 2. Maintenance Bill Published
+    Billed --> Detached: 3. Admin Deletes Maintenance Bill (Readings NOT destroyed!)
+    
+    state "Admin Re-creates Bill for August" as Recreate {
+        Detached --> Detect: System detects saved August readings
+        Detect --> PromptUser: Displays Recovery Prompt
+        PromptUser --> Restore: Admin selects "Use Saved Readings"
+        PromptUser --> Discard: Admin selects "Start Fresh"
+        Restore --> Draft: Re-linked to new maintenance_id with pre-filled readings
+        Discard --> [*]: Detached readings marked is_deleted true; pulls July baseline
+    }
+          </div>
+        </div>
+
+        <h3>How It Works:</h3>
+        <ol style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 10px;">
+          <li>
+            <strong>When a Maintenance Bill is Deleted:</strong>
+            <code>AdminMaintenance</code> and <code>Maintenance</code> bills are soft-deleted. The linked <code>waterreadings</code> are <strong>not deleted</strong>; their status is transitioned to:
+            <code>status = "detached", maintenance_id = null</code>.
+          </li>
+          <li>
+            <strong>When Creating a Bill for That Same Starting Month:</strong>
+            The backend checks if any detached readings exist for that society and starting month:
+            <pre><code>const existingReadings = await WaterReading.find({
+  society_id: societyId,
+  start_month: targetStartMonth,
+  status: "detached",
+  is_deleted: false,
+});</code></pre>
+          </li>
+          <li>
+            <strong>User Prompt in UI:</strong>
+            If matching detached readings are found, the UI displays a clean prompt:
+            <div class="callout warning" style="margin: 12px 0;">
+              <div class="callout-icon">💡</div>
+              <div class="callout-content">
+                <div class="callout-title">Existing Readings Found for August 2026</div>
+                We found <strong>85 saved water readings</strong> for August 2026 from a previously deleted bill cycle.<br>
+                <div style="margin-top: 10px; display: flex; gap: 12px;">
+                  <button style="padding: 6px 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Use Saved Readings</button>
+                  <button style="padding: 6px 14px; background: white; color: var(--text-muted); border: 1px solid var(--border-card); border-radius: 8px; font-weight: 600; cursor: pointer;">Start Fresh</button>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <strong>If "Use Saved Readings" is Selected:</strong>
+            All flats instantly pre-fill with their previous and current readings. The readings are re-attached to the new billing cycle:
+            <code>maintenance_id = new_maintenance_id, status = "draft"</code>.
+            If only flat 204 had a mistake, the admin simply edits flat 204 inline.
+          </li>
+          <li>
+            <strong>If "Start Fresh" is Selected:</strong>
+            The detached August readings are marked <code>is_deleted: true</code>, and the baseline previous readings are pulled from the preceding valid cycle (July).
+          </li>
+        </ol>
+      </section>
+
+      <!-- 5. Inline Editing in Bill Review -->
+      <section id="inline-editing">
+        <h2>5. Inline Editing in Maintenance Bill Review Screen</h2>
+        <p>
+          On the review page (<code>/create-maintenance-bill/:societyId/:id</code>), admins can adjust water readings directly inline without leaving the table.
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Flat No</th>
+                <th>Type</th>
+                <th>Maintenance (₹)</th>
+                <th>Water Reading (Previous &rarr; Current)</th>
+                <th>Consumed Units</th>
+                <th>Water Charge</th>
+                <th>Total Flat Bill</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>101</strong></td>
+                <td><span class="pill pill-blue">Owner</span></td>
+                <td><input type="number" value="2500" style="width: 80px; padding: 4px; text-align: center; border: 1px solid #cbd5e1; border-radius: 6px;" /></td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <code>150</code> &rarr;
+                    <input type="number" value="195" style="width: 75px; padding: 4px; font-weight: 700; text-align: center; border: 1px solid #93c5fd; border-radius: 6px; background: #eff6ff;" />
+                  </div>
+                </td>
+                <td><strong>45 units</strong></td>
+                <td>45 &times; ₹15 = ₹675</td>
+                <td><strong style="color: var(--primary);">₹3,175</strong></td>
+              </tr>
+              <tr>
+                <td><strong>102</strong></td>
+                <td><span class="pill pill-red">Closed</span></td>
+                <td>₹0</td>
+                <td><span style="color: var(--secondary); font-style: italic;">Closed Flat</span></td>
+                <td>0 units</td>
+                <td>₹0</td>
+                <td><strong>₹0</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Dynamic Recalculation Behavior</h3>
+        <ul>
+          <li>Changing <code>Current Reading</code> automatically updates:
+            $$\text{consumed\_unit} = \max(\text{minimum\_water\_unit}, (\text{current\_reading} - \text{previous\_reading}))$$
+            $$\text{water\_amount} = \text{consumed\_unit} \times \text{unit\_price}$$
+            $$\text{total\_flat\_bill} = \text{maintenance\_amount} + \text{water\_amount} + \text{additional\_expenses}$$
+          </li>
+          <li>Footer sums for total society water charges and total bill collection update immediately.</li>
+        </ul>
+      </section>
+
+      <!-- 6. Business Rules & Calculations -->
+      <section id="business-rules">
+        <h2>6. Business Rules &amp; Calculation Logic</h2>
+
+        <h3>Rule 1: Flat Eligibility (Open Flats Only)</h3>
+        <ul>
+          <li><strong>Open Flats (<code>owner</code>, <code>rent</code>, <code>shop</code>):</strong> Eligible for water readings and charges.</li>
+          <li><strong>Closed Flats (<code>closed</code>):</strong> Strictly excluded. Billed water units = 0, water charge = ₹0. No water reading document is generated.</li>
+        </ul>
+
+        <h3>Rule 2: Minimum Water Units Floor</h3>
+        <p>Enforced identically on both Frontend and Backend:</p>
+        <pre><code>function calculateWaterUnits(previousReading, currentReading, minimumWaterUnit) {
+  const prev = Number(previousReading) || 0;
+  const curr = Number(currentReading) || 0;
+  const actualUsage = Math.max(0, curr - prev);
+  const minThreshold = Number(minimumWaterUnit) || 0;
+  
+  return Math.max(actualUsage, minThreshold);
+}</code></pre>
+      </section>
+
+      <!-- 7. Dedicated Water Readings APIs -->
+      <section id="apis">
+        <h2>7. Dedicated Water Readings API Specifications</h2>
+        <p>
+          We do not use <code>floorUnit</code> endpoints for water readings. Dedicated APIs under <code>/society/water-reading</code> manage the lifecycle cleanly:
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Permission</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/water-reading/get-readings/:admin_maintenance_id</code></td>
+                <td>MAINTENANCE_BILLS: VIEW</td>
+                <td>Fetches all flat readings for a billing cycle (grouped by wing), including resolved baseline previous readings.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-put">PUT</span></td>
+                <td><code>/society/water-reading/bulk-update/:admin_maintenance_id</code></td>
+                <td>MAINTENANCE_BILLS: CREATE</td>
+                <td>Saves or updates flat water readings for the billing cycle (used in Step 2 and for inline table edits).</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/water-reading/check-existing-readings/:society_id</code></td>
+                <td>MAINTENANCE_BILLS: VIEW</td>
+                <td>Checks if detached readings exist for a given <code>start_month</code> (query param) for smart recovery.</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-post">POST</span></td>
+                <td><code>/society/water-reading/restore-detached-readings/:admin_maintenance_id</code></td>
+                <td>MAINTENANCE_BILLS: CREATE</td>
+                <td>Re-links detached readings to the newly initialized maintenance cycle when admin chooses "Use Saved Readings".</td>
+              </tr>
+              <tr>
+                <td><span class="method-badge method-get">GET</span></td>
+                <td><code>/society/water-reading/history/:floor_unit_id</code></td>
+                <td>Access Token</td>
+                <td>Returns the past 2–3 months of readings and consumption for a flat.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Payload Example: <code>bulk-update</code></h3>
+        <pre><code>// PUT /society/water-reading/bulk-update/:admin_maintenance_id
+{
+  "readings": [
+    {
+      "floor_unit_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+      "previous_reading": 150,
+      "current_reading": 195
+    },
+    {
+      "floor_unit_id": "64f1a2b3c4d5e6f7a8b9c0d2",
+      "previous_reading": 210,
+      "current_reading": 260
+    }
+  ]
+}</code></pre>
+      </section>
+
+      <!-- 8. Month-Wise History Access -->
+      <section id="history">
+        <h2>8. Month-Wise History Access (Past 2–3 Months)</h2>
+        <p>
+          Admins and residents can view month-wise water usage trends directly from past billing cycles:
+        </p>
+
+        <pre><code>// Response from GET /society/water-reading/history/:floor_unit_id
+{
+  "code": 200,
+  "data": [
+    {
+      "month": "August 2026",
+      "previous_reading": 150,
+      "current_reading": 195,
+      "consumed_unit": 45,
+      "water_amount": 675
+    },
+    {
+      "month": "July 2026",
+      "previous_reading": 110,
+      "current_reading": 150,
+      "consumed_unit": 40,
+      "water_amount": 600
+    },
+    {
+      "month": "June 2026",
+      "previous_reading": 75,
+      "current_reading": 110,
+      "consumed_unit": 35,
+      "water_amount": 525
+    }
+  ]
+}</code></pre>
+      </section>
+
+      <!-- 9. Migration & Legacy Compatibility -->
+      <section id="migration">
+        <h2>9. Backward Compatibility &amp; Migration Plan</h2>
+        <ol style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 10px;">
+          <li>
+            <strong>First Cycle Baseline Fallback:</strong> For existing societies running this new flow for the first time, if no records exist in <code>waterreadings</code>, the system reads <code>floorUnit.water_previous_unit</code> as its baseline.
+          </li>
+          <li>
+            <strong>Zero Master Overwrites:</strong> Once the first cycle is saved in <code>waterreadings</code>, all future previous readings are resolved exclusively from <code>waterreadings</code>. Master <code>floorunits</code> is never mutated again.
+          </li>
+          <li>
+            <strong>Member Compatibility:</strong> Resident bill details and downloaded PDF receipts remain 100% backward compatible since <code>Maintenance</code> documents continue to hold the final snapshot amounts for display.
+          </li>
+        </ol>
+      </section>
+
+      <!-- 10. Proposed Folder & File Architecture -->
+      <section id="folder-architecture">
+        <h2>10. Proposed Folder &amp; File Architecture</h2>
+        <p>
+          To maintain high cohesion, separation of concerns, and align with established enterprise multi-repo patterns across <code>society-management-backend</code> and <code>society-management-frontend</code>, the proposed folder and file additions, modifications, and deprecations are structured as follows:
+        </p>
+
+        <h3>10.1 Backend Architecture (<code>society-management-backend</code>)</h3>
+        <p>
+          A dedicated submodule <code>waterReading</code> is created under <code>src/modules/society/submodules/</code>, isolating all database models, DAOs, services, and route controllers. Master flat mutation is completely removed:
+        </p>
+
+        <pre><code>society-management-backend/
+├── src/
+│   ├── routes.js                                              # [MODIFIED] Mounts /society/water-reading router
+│   └── modules/
+│       └── society/
+│           └── submodules/
+│               ├── waterReading/                              # [NEW SUBMODULE]
+│               │   ├── waterReading.model.js                  # [NEW] Mongoose schema for waterreadings collection
+│               │   ├── waterReading.dao.js                    # [NEW] MongoDB queries: baseline resolution, cycle upsert, smart recovery
+│               │   ├── waterReading.service.js                # [NEW] Business logic: minimum unit formula, billing linkage, rollback
+│               │   ├── waterReading.controller.js             # [NEW] Express request/response formatting
+│               │   ├── waterReading.routes.js                 # [NEW] API route declarations with auth & RBAC middleware
+│               │   ├── waterReading.constants.js              # [NEW] Enums: status (draft/billed/detached), log messages
+│               │   └── waterReading.doc.js                    # [NEW] Swagger / OpenAPI specifications
+│               │
+│               ├── maintenance/
+│               │   ├── maintenance.service.js                 # [MODIFIED] Dispatches reading detachment on cycle delete; uses waterreadings on publish
+│               │   └── maintenance.dao.js                     # [MODIFIED] Ceases updating floorUnit water reading fields
+│               │
+│               ├── adminMaintenance/
+│               │   └── adminMaintenance.model.js              # [MODIFIED] Stores billing cycle snapshot & links to waterreadings
+│               │
+│               └── floorUnit/
+│                   ├── floorUnit.service.js                   # [MODIFIED] Deprecates water reading updates via editFloorsData
+│                   └── floorUnit.routes.js                    # [MODIFIED] Deprecates /reset-water-units/:id route</code></pre>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>File Path</th>
+                <th>Status</th>
+                <th>Primary Responsibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>src/modules/society/submodules/waterReading/waterReading.model.js</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Defines the Mongoose schema for the <code>waterreadings</code> collection, including compound indexes: <code>{ floor_unit_id: 1, is_deleted: 1, start_month: -1 }</code> and <code>{ society_id: 1, start_month: 1, status: 1 }</code>.</td>
+              </tr>
+              <tr>
+                <td><code>src/modules/society/submodules/waterReading/waterReading.dao.js</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Database queries: resolves prior baseline reading, bulk upserts readings by <code>maintenance_id</code>, queries detached readings for recovery, and fetches flat historical records.</td>
+              </tr>
+              <tr>
+                <td><code>src/modules/society/submodules/waterReading/waterReading.service.js</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Calculates <code>consumed_unit = max(min_unit, curr - prev)</code>, computes total water cost, manages detachment on cycle deletion, and handles smart restoration.</td>
+              </tr>
+              <tr>
+                <td><code>src/modules/society/submodules/waterReading/waterReading.controller.js</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Controller handling incoming HTTP payloads, parameter validation, and formatting standard JSON responses.</td>
+              </tr>
+              <tr>
+                <td><code>src/modules/society/submodules/waterReading/waterReading.routes.js</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Declares routes for <code>get-readings</code>, <code>bulk-update</code>, <code>check-existing-readings</code>, <code>restore-detached-readings</code>, and <code>history</code>.</td>
+              </tr>
+              <tr>
+                <td><code>src/modules/society/submodules/waterReading/waterReading.constants.js</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Constants and Enums: Status (<code>draft</code>, <code>billed</code>, <code>detached</code>), audit actions, and error messages.</td>
+              </tr>
+              <tr>
+                <td><code>src/modules/society/submodules/maintenance/maintenance.service.js</code></td>
+                <td><span class="pill pill-blue">MODIFIED</span></td>
+                <td>Updated <code>deleteAdminMaintenanceBillBySocietyAdmin</code> to cascade detachment of water readings instead of mutating master flats. Linked water readings on bulk publish.</td>
+              </tr>
+              <tr>
+                <td><code>src/modules/society/submodules/floorUnit/floorUnit.service.js</code></td>
+                <td><span class="pill pill-amber">DEPRECATED (LOGIC)</span></td>
+                <td>Removes reading field overwrites from <code>editFloorsData</code>. Water data is no longer stored or mutated in <code>floorunits</code>.</td>
+              </tr>
+              <tr>
+                <td><code>src/routes.js</code></td>
+                <td><span class="pill pill-blue">MODIFIED</span></td>
+                <td>Registers <code>app.use("/society/water-reading", waterReadingRouter)</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>10.2 Frontend Architecture (<code>society-management-frontend</code>)</h3>
+        <p>
+          The frontend architecture integrates the water reading entry step directly into the maintenance wizard, introduces smart recovery modals, equips the bill review table with live inline editable cells, and retires legacy standalone screens:
+        </p>
+
+        <pre><code>society-management-frontend/src/
+├── routes/
+│   └── local-routes.tsx                                       # [MODIFIED] Registers integrated wizard step route; de-routes legacy screens
+├── utils/
+│   └── route-builders.ts                                      # [MODIFIED] Adds route helper for cycle water reading entry
+└── services/
+    └── society-management/
+        └── maintenance/
+            └── sub-modules/
+                └── society-admin/
+                    ├── services/
+                    │   ├── water-reading/                     # [NEW SERVICE]
+                    │   │   ├── api-route.ts                   # [NEW] Endpoints for /society/water-reading/*
+                    │   │   └── index.ts                       # [NEW] Axios client methods for water readings
+                    │   └── water-meter/                       # [RETIRED / DEPRECATED] Replaced by water-reading
+                    │
+                    ├── hooks/
+                    │   ├── water-reading/                     # [NEW HOOKS]
+                    │   │   ├── use-get-cycle-readings.ts      # [NEW] React Query hook to fetch cycle readings with baseline
+                    │   │   ├── use-bulk-update-readings.ts    # [NEW] Mutation hook to save/update readings
+                    │   │   ├── use-check-existing-readings.ts # [NEW] Hook to check detached readings for smart recovery
+                    │   │   ├── use-restore-readings.ts        # [NEW] Mutation hook to restore detached readings
+                    │   │   └── use-flat-water-history.ts      # [NEW] Hook to fetch past 2-3 months flat history
+                    │   └── water-meter/                       # [RETIRED / DEPRECATED] Replaced by water-reading hooks
+                    │
+                    ├── types/
+                    │   ├── water-reading/                     # [NEW TYPES]
+                    │   │   ├── index.ts                       # [NEW] Core WaterReading interfaces
+                    │   │   ├── api-request-type.ts            # [NEW] Bulk update and restore request types
+                    │   │   └── api-response-type.ts           # [NEW] API response payload interfaces
+                    │   └── water-meter/                       # [RETIRED / DEPRECATED] Replaced by water-reading types
+                    │
+                    └── components/
+                        ├── maintenance-landing.tsx            # [MODIFIED] Water card links directly to unified regular billing wizard
+                        ├── bills/
+                        │   └── regular-bill/
+                        │       ├── select-bill-duration.tsx   # [MODIFIED] Step 1: Navigates to Step 2 with maintenance_id
+                        │       ├── enter-cycle-water-readings.tsx # [NEW COMPONENT] Step 2: Integrated wizard step for water entry
+                        │       ├── create-edit-regular-bill.tsx   # [MODIFIED] Step 3: Review table with inline editable cells
+                        │       └── modals/
+                        │           ├── restore-readings-modal.tsx # [NEW MODAL] Recovery prompt for detached readings
+                        │           └── water-history-popover.tsx  # [NEW COMPONENT] 2-3 months history popover
+                        │
+                        └── water-meter/                       # [RETIRED / DEPRECATED]
+                            ├── create-water-bill.tsx          # [DEPRECATED] Subsumed into enter-cycle-water-readings.tsx
+                            ├── water-meter-readings.tsx       # [DEPRECATED] Subsumed into billing cycle wizard
+                            └── floor-cards-skeleton.tsx       # [DEPRECATED] Subsumed into wizard skeleton loaders</code></pre>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>File Path</th>
+                <th>Status</th>
+                <th>Primary Responsibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>.../regular-bill/enter-cycle-water-readings.tsx</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Step 2 of the wizard. Displays wing-by-wing entry of water readings with baseline pre-populated from <code>waterreadings</code>. Calculates live consumed units &amp; charges.</td>
+              </tr>
+              <tr>
+                <td><code>.../modals/restore-readings-modal.tsx</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Prompts admin when detached readings are detected for the selected billing month, offering "Use Saved Readings" (auto-link) or "Start Fresh" (baseline re-fetch).</td>
+              </tr>
+              <tr>
+                <td><code>.../regular-bill/create-edit-regular-bill.tsx</code></td>
+                <td><span class="pill pill-blue">MODIFIED</span></td>
+                <td>Transforms the Water column into an interactive input for open flats, recalculating consumed units and row totals live. Excludes closed flats.</td>
+              </tr>
+              <tr>
+                <td><code>.../modals/water-history-popover.tsx</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Popover/drawer displaying 2–3 months historical reading breakdown for a flat.</td>
+              </tr>
+              <tr>
+                <td><code>.../services/water-reading/index.ts</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>Axios API client functions for all <code>/society/water-reading/*</code> endpoints.</td>
+              </tr>
+              <tr>
+                <td><code>.../hooks/water-reading/use-bulk-update-readings.ts</code></td>
+                <td><span class="pill pill-green">NEW</span></td>
+                <td>TanStack React Query mutation hook for batch updating readings during Step 2 and inline table edits.</td>
+              </tr>
+              <tr>
+                <td><code>.../components/maintenance-landing.tsx</code></td>
+                <td><span class="pill pill-blue">MODIFIED</span></td>
+                <td>Streamlines dashboard navigation to direct billing flow through regular bill wizard rather than detached screens.</td>
+              </tr>
+              <tr>
+                <td><code>.../components/water-meter/*</code></td>
+                <td><span class="pill pill-red">RETIRED</span></td>
+                <td>Legacy standalone entry and reading screens deprecated in favor of integrated wizard steps.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    Product Requirement Document (PRD) &bull; E Building Society Management System &bull; September 2026
+  </footer>
+
+</body>
+</html>

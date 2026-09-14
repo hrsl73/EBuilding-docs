@@ -1,0 +1,42 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/water-meter",
+      "destination": "/water-meter-flow-prd.html"
+    },
+    {
+      "source": "/water-meter-prd",
+      "destination": "/water-meter-flow-prd.html"
+    },
+    {
+      "source": "/water-meter-analysis",
+      "destination": "/water-meter-flow-analysis-existing.html"
+    },
+    {
+      "source": "/legacy-analysis",
+      "destination": "/water-meter-flow-analysis-existing.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}

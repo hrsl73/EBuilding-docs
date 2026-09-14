@@ -1,0 +1,20 @@
+{
+  "name": "ebuilding-docs",
+  "version": "1.0.0",
+  "description": "E-Building Product Requirement Documents (PRDs) & Architecture Specifications Hub",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": [
+    "ebuilding",
+    "prd",
+    "architecture",
+    "society-management",
+    "documentation"
+  ],
+  "author": "E-Building Engineering Team",
+  "license": "UNLICENSED",
+  "private": true
+}
