@@ -104,32 +104,18 @@
       align-items: center;
       gap: 6px;
       padding: 5px 12px;
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
       border-radius: 20px;
       font-size: 0.8rem;
       font-weight: 600;
     }
 
-    .badge-pulse {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-
     .hero {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 48px 24px 32px 24px;
+      padding: 44px 24px 28px 24px;
       width: 100%;
     }
 
@@ -143,23 +129,23 @@
       border-radius: 30px;
       font-size: 0.82rem;
       font-weight: 700;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .hero-title {
-      font-size: 2.5rem;
+      font-size: 2.3rem;
       font-weight: 800;
       letter-spacing: -0.03em;
       color: #0f172a;
       line-height: 1.2;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .hero-subtitle {
-      font-size: 1.12rem;
+      font-size: 1.05rem;
       color: var(--text-muted);
       max-width: 760px;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     .controls-bar {
@@ -209,15 +195,16 @@
 
     .stats-container {
       display: flex;
-      gap: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .stat-pill {
       background: #ffffff;
       border: 1px solid var(--card-border);
       border-radius: 10px;
-      padding: 8px 16px;
-      font-size: 0.85rem;
+      padding: 8px 14px;
+      font-size: 0.83rem;
       color: var(--text-muted);
       box-shadow: var(--shadow-sm);
     }
@@ -226,12 +213,47 @@
       color: var(--text-main);
     }
 
+    /* Comparison Legend Bar */
+    .legend-banner {
+      max-width: 1200px;
+      margin: 0 auto 24px auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    .legend-box {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.88rem;
+    }
+
+    .legend-title {
+      font-weight: 700;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #475569;
+    }
+
     .cards-grid {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 24px 48px 24px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
       gap: 24px;
       width: 100%;
       flex: 1;
@@ -239,7 +261,7 @@
 
     .doc-card {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      border: 2px solid var(--card-border);
       border-radius: 16px;
       padding: 28px;
       display: flex;
@@ -248,50 +270,107 @@
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: var(--shadow-sm);
       position: relative;
-      overflow: hidden;
+    }
+
+    .doc-card.card-proposed {
+      border-color: #93c5fd;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .doc-card.card-existing {
+      border-color: #fed7aa;
+      background: linear-gradient(180deg, #ffffff 0%, #fffbf7 100%);
     }
 
     .doc-card:hover {
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
-      border-color: var(--border-hover);
+    }
+
+    .flow-badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      align-self: flex-start;
+    }
+
+    .badge-flow-proposed {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .badge-flow-existing {
+      background: #ffedd5;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
     }
 
     .card-top {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-icon-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .card-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
 
     .icon-blue { background: #dbeafe; }
-    .icon-red { background: #fee2e2; }
-    .icon-purple { background: #ede9fe; }
+    .icon-orange { background: #ffedd5; }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       padding: 4px 10px;
-      border-radius: 20px;
+      border-radius: 8px;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.02em;
       text-transform: uppercase;
     }
 
-    .badge-approved { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-    .badge-analysis { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-in-review {
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+
+    .badge-legacy {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .dot-amber { background: #f59e0b; }
+    .dot-red { background: #ef4444; }
 
     .card-title {
       font-size: 1.25rem;
@@ -299,6 +378,19 @@
       color: #0f172a;
       line-height: 1.35;
       margin-bottom: 10px;
+    }
+
+    .card-subtitle {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle.existing-subtitle {
+      color: #c2410c;
     }
 
     .card-description {
@@ -313,7 +405,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .tag {
@@ -331,11 +423,23 @@
       align-items: center;
       justify-content: space-between;
       padding-top: 18px;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid var(--card-border);
     }
 
-    .card-meta {
-      font-size: 0.8rem;
+    .card-meta-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .card-meta-time {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .card-meta-read {
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
 
@@ -366,6 +470,7 @@
       padding: 10px 18px;
       background: #f1f5f9;
       color: #334155;
+      border: 1px solid #cbd5e1;
       border-radius: 10px;
       text-decoration: none;
       font-weight: 600;
@@ -375,6 +480,7 @@
 
     .btn-secondary:hover {
       background: #e2e8f0;
+      transform: translateX(2px);
     }
 
     footer {
@@ -388,10 +494,11 @@
     }
 
     @media (max-width: 768px) {
-      .hero-title { font-size: 2rem; }
+      .hero-title { font-size: 1.85rem; }
       .cards-grid { grid-template-columns: 1fr; }
       .controls-bar { flex-direction: column; align-items: stretch; }
       .search-box { max-width: 100%; }
+      .legend-box { flex-direction: column; align-items: flex-start; gap: 10px; }
     }
   </style>
 </head>
@@ -403,13 +510,12 @@
         <div class="brand-logo">E</div>
         <div class="brand-text">
           <h1>E-Building</h1>
-          <p>Product Specifications &amp; Architecture</p>
+          <p>Product Specifications &amp; Architecture Hub</p>
         </div>
       </a>
       <div class="nav-links">
         <div class="badge-live">
-          <span class="badge-pulse"></span>
-          <span>Vercel Ready</span>
+          <span>🕒 Last Updated: 14 Sep 2026, 11:50 AM</span>
         </div>
       </div>
     </div>
@@ -421,7 +527,7 @@
     </div>
     <h1 class="hero-title">Engineering PRDs &amp; System Designs</h1>
     <p class="hero-subtitle">
-      Centralized documentation hub for E-Building society management modules. Canonical specifications, database architecture, API contracts, and user flows.
+      Centralized documentation hub for E-Building society management modules. Compare the <strong>Current Production Flow</strong> with the <strong>New Proposed Architecture PRD</strong>.
     </p>
 
     <div class="controls-bar">
@@ -430,64 +536,95 @@
         <input type="text" id="searchInput" placeholder="Search PRDs, schemas, APIs..." oninput="filterCards()">
       </div>
       <div class="stats-container">
-        <div class="stat-pill"><strong>2</strong> Documents</div>
-        <div class="stat-pill">Status: <strong>Production Ready</strong></div>
+        <div class="stat-pill">Total Documents: <strong>2</strong></div>
+        <div class="stat-pill">New PRD Status: <strong style="color: #b45309;">In Review (Pending Approval)</strong></div>
       </div>
     </div>
   </section>
 
+  <!-- Legend to easily distinguish Current vs Proposed -->
+  <div class="legend-banner">
+    <div class="legend-box">
+      <span class="legend-title">📌 Quick Guide:</span>
+      <div class="legend-item">
+        <span class="flow-badge-top badge-flow-proposed" style="margin: 0;">✨ Proposed New Flow</span>
+        <span>Future target architecture undergoing review (not yet approved)</span>
+      </div>
+      <div class="legend-item">
+        <span class="flow-badge-top badge-flow-existing" style="margin: 0;">⚙️ Current Working Flow</span>
+        <span>Active production workflow &amp; technical audit of existing flaws</span>
+      </div>
+    </div>
+  </div>
+
   <main class="cards-grid" id="cardsGrid">
 
-    <!-- Card 1: Water Meter PRD -->
-    <article class="doc-card" data-title="water meter reading flow prd integrated maintenance billing architecture" data-tags="prd mongodb class-diagram api-contracts maintenance-billing smart-recovery">
+    <!-- Card 1: NEW PROPOSED FLOW PRD -->
+    <article class="doc-card card-proposed" data-title="proposed new flow water meter reading prd integrated maintenance billing architecture" data-tags="new-flow proposed prd mongodb class-diagram api-contracts maintenance-billing smart-recovery in-review">
       <div>
+        <span class="flow-badge-top badge-flow-proposed">✨ PROPOSED NEW FLOW</span>
         <div class="card-top">
           <div class="card-icon icon-blue">💧</div>
-          <span class="status-badge badge-approved">Approved PRD</span>
+          <span class="status-badge badge-in-review">
+            <span class="status-dot dot-amber"></span>
+            <span>Under Review (Not Approved)</span>
+          </span>
         </div>
+        <div class="card-subtitle">Future Target Architecture</div>
         <h2 class="card-title">Water Meter Flow &amp; Integrated Billing PRD</h2>
         <p class="card-description">
-          Canonical product specification for integrating water meter readings into the regular maintenance billing wizard. Covers dedicated <code>waterreadings</code> schema, Mermaid class diagram, smart recovery on bill deletion, inline editing, and dedicated APIs.
+          The <strong>new proposed specification</strong> that eliminates isolated water screens and moves water readings directly inside the Maintenance Bill wizard. Features a dedicated <code>waterreadings</code> collection (never mutates master flats), smart reading recovery when bills are deleted, inline table editing, and clean APIs.
         </p>
         <div class="card-tags">
-          <span class="tag">MongoDB</span>
+          <span class="tag">Proposed Design</span>
+          <span class="tag">waterreadings</span>
           <span class="tag">Class Diagram</span>
           <span class="tag">Smart Recovery</span>
           <span class="tag">Inline Edit</span>
-          <span class="tag">APIs</span>
         </div>
       </div>
       <div class="card-footer">
-        <span class="card-meta">Updated Sept 2026 &bull; 15 min read</span>
+        <div class="card-meta-block">
+          <span class="card-meta-time">🕒 Updated: 14 Sep 2026, 11:50 AM</span>
+          <span class="card-meta-read">Status: In Review &bull; 15 min read</span>
+        </div>
         <a href="water-meter-flow-prd.html" class="btn-primary">
-          <span>Read PRD</span>
+          <span>Read Proposed PRD</span>
           <span>&rarr;</span>
         </a>
       </div>
     </article>
 
-    <!-- Card 2: Existing Flow Flaw Analysis -->
-    <article class="doc-card" data-title="water meter flow analysis existing system flaws legacy architecture" data-tags="analysis legacy flaws technical-debt audit">
+    <!-- Card 2: CURRENT WORKING PRODUCTION FLOW & FLAW ANALYSIS -->
+    <article class="doc-card card-existing" data-title="current working flow existing production system water meter flaw analysis legacy architecture" data-tags="existing-flow current-working legacy audit 10-flaws technical-debt production">
       <div>
+        <span class="flow-badge-top badge-flow-existing">⚙️ CURRENT WORKING FLOW</span>
         <div class="card-top">
-          <div class="card-icon icon-red">🔍</div>
-          <span class="status-badge badge-analysis">Architecture Audit</span>
+          <div class="card-icon icon-orange">🔍</div>
+          <span class="status-badge badge-legacy">
+            <span class="status-dot dot-red"></span>
+            <span>Active In Production (Has Flaws)</span>
+          </span>
         </div>
-        <h2 class="card-title">Legacy Flow &amp; Flaw Analysis</h2>
+        <div class="card-subtitle existing-subtitle">Current System Audit &amp; Flaws</div>
+        <h2 class="card-title">Current Production Flow &amp; Flaw Analysis</h2>
         <p class="card-description">
-          Detailed technical teardown of the legacy water meter system across backend and frontend. Identifies 10 critical failure modes, including data loss on bill deletion, master flat overwriting, formula drift, and race conditions.
+          Detailed technical breakdown of how the <strong>current production flow</strong> works today. Identifies 10 critical flaws in the active implementation: why deleting a bill destroys previous meter readings, master flat overwrite vulnerabilities, formula drift, and race conditions between disconnected screens.
         </p>
         <div class="card-tags">
-          <span class="tag">Audit</span>
+          <span class="tag">Current System</span>
           <span class="tag">10 Flaws</span>
-          <span class="tag">Root Cause</span>
+          <span class="tag">Root Causes</span>
           <span class="tag">Legacy Code</span>
         </div>
       </div>
       <div class="card-footer">
-        <span class="card-meta">Updated Sept 2026 &bull; 10 min read</span>
+        <div class="card-meta-block">
+          <span class="card-meta-time">🕒 Updated: 14 Sep 2026, 11:50 AM</span>
+          <span class="card-meta-read">Status: Active Production Audit &bull; 10 min read</span>
+        </div>
         <a href="water-meter-flow-analysis-existing.html" class="btn-secondary">
-          <span>View Audit</span>
+          <span>View Current Flow Audit</span>
           <span>&rarr;</span>
         </a>
       </div>
@@ -496,7 +633,7 @@
   </main>
 
   <footer>
-    &copy; 2026 E-Building Society Management System. All rights reserved.
+    &copy; 2026 E-Building Society Management System &bull; Documentation &amp; PRD Portal
   </footer>
 
   <script>
