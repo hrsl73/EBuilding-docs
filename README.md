@@ -10,6 +10,7 @@ A centralized, cloud-deployable documentation repository for **E-Building Societ
 | :--- | :--- | :--- | :--- |
 | **Water Meter Flow PRD** | [`water-meter-flow-prd.html`](water-meter-flow-prd.html) | `/water-meter` or `/water-meter-prd` | Canonical product specification for integrating water meter readings into the regular maintenance billing cycle with smart recovery on bill deletion, inline editing, and dedicated APIs. |
 | **Legacy Architecture Audit** | [`water-meter-flow-analysis-existing.html`](water-meter-flow-analysis-existing.html) | `/water-meter-analysis` or `/legacy-analysis` | Complete teardown of the legacy water meter system across backend and frontend, detailing 10 critical flaws and root causes. |
+| **Monthly Collection Entry in Finance BRD** | [`finance-monthly-collection-entry-brd.html`](finance-monthly-collection-entry-brd.html) | `/finance-monthly-collection` or `/finance-brd` | System-generated monthly credit entry in Finance for all bill collections, with gateway payments at the Easebuzz settled amount, current-FY backfill, re-log and feature flags. |
 
 ---
 
@@ -64,6 +65,7 @@ ebuilding-docs/
 ├── index.html                               # Hub homepage with search & cards
 ├── water-meter-flow-prd.html                # Canonical Water Meter PRD
 ├── water-meter-flow-analysis-existing.html  # Legacy system audit
+├── finance-monthly-collection-entry-brd.html # Monthly Collection Entry in Finance BRD
 ├── vercel.json                              # Vercel rewrites, headers & clean URLs
 ├── package.json                             # Helper scripts for local preview
 ├── .gitignore                               # Git ignore rules

@@ -18,6 +18,14 @@
     {
       "source": "/legacy-analysis",
       "destination": "/water-meter-flow-analysis-existing.html"
+    },
+    {
+      "source": "/finance-monthly-collection",
+      "destination": "/finance-monthly-collection-entry-brd.html"
+    },
+    {
+      "source": "/finance-brd",
+      "destination": "/finance-monthly-collection-entry-brd.html"
     }
   ],
   "headers": [

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BRD - Monthly Collection Entry in Finance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --secondary: #64748b;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --border-card: #e2e8f0;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --warning-border: #fde68a;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --success-border: #a7f3d0;
+      --info: #0ea5e9;
+      --info-light: #f0f9ff;
+      --info-border: #bae6fd;
+      --code-bg: #1e293b;
+      --code-text: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 48px 32px;
+      border-bottom: 4px solid var(--primary);
+    }
+
+    .header-container { max-width: 1200px; margin: 0 auto; }
+
+    .badge-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(254, 243, 199, 0.2);
+      border: 1px solid #fde68a;
+      color: #fef3c7;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .subtitle { font-size: 1.15rem; color: #94a3b8; max-width: 850px; line-height: 1.55; }
+    .subtitle code { background: rgba(255,255,255,0.08); color: #e2e8f0; border-color: rgba(255,255,255,0.15); }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.875rem;
+      color: #cbd5e1;
+    }
+
+    .meta-item strong { color: white; }
+
+    .main-layout {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 24px 64px 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 36px;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 1fr; padding: 0 16px 48px 16px; }
+      .toc-sidebar { display: none; }
+      header { padding: 32px 16px; }
+      h1 { font-size: 1.8rem; }
+      section { padding: 22px; }
+    }
+
+    .toc-sidebar {
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--secondary);
+      margin-bottom: 16px;
+    }
+
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+    .toc-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: block;
+    }
+
+    .toc-list a:hover { color: var(--primary); background: var(--primary-light); }
+
+    .content-area { min-width: 0; }
+
+    section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    h3 { font-size: 1.22rem; font-weight: 700; color: #1e293b; margin: 24px 0 12px 0; }
+
+    p { color: var(--text-muted); font-size: 0.975rem; margin-bottom: 16px; }
+
+    ul, ol { color: var(--text-muted); font-size: 0.95rem; padding-left: 22px; margin-bottom: 16px; }
+    li { margin-bottom: 6px; }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+    }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    thead { background: #f1f5f9; }
+
+    th {
+      padding: 12px 16px;
+      font-weight: 700;
+      color: #334155;
+      border-bottom: 1px solid var(--border-card);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      overflow-wrap: anywhere;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    pre code { background: transparent; color: inherit; padding: 0; border: none; }
+
+    .callout {
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      font-size: 0.95rem;
+    }
+
+    .callout-icon { font-size: 1.4rem; line-height: 1; }
+    .callout-content { flex: 1; min-width: 0; }
+    .callout-title { font-weight: 700; margin-bottom: 4px; }
+    .callout ul { color: inherit; margin: 6px 0 0 0; }
+
+    .callout.danger { background: var(--danger-light); border: 1px solid var(--danger-border); color: #991b1b; }
+    .callout.danger .callout-title { color: #b91c1c; }
+    .callout.warning { background: var(--warning-light); border: 1px solid var(--warning-border); color: #92400e; }
+    .callout.warning .callout-title { color: #b45309; }
+    .callout.info { background: var(--info-light); border: 1px solid var(--info-border); color: #075985; }
+    .callout.info .callout-title { color: #0284c7; }
+    .callout.success { background: var(--success-light); border: 1px solid var(--success-border); color: #065f46; }
+    .callout.success .callout-title { color: #059669; }
+
+    .method-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+    .method-get { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .method-post { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .method-put { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .pill-blue { background: #dbeafe; color: #1d4ed8; }
+    .pill-green { background: #dcfce7; color: #15803d; }
+    .pill-red { background: #fee2e2; color: #b91c1c; }
+    .pill-amber { background: #fef3c7; color: #b45309; }
+    .pill-gray { background: #f1f5f9; color: #475569; }
+
+    .step-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      display: flex;
+      gap: 16px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .step-body { flex: 1; min-width: 0; }
+    .step-title { font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--secondary);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-card);
+      background: white;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="badge-header">✨ PROPOSED NEW FLOW &bull; UNDER REVIEW</div>
+      <h1>Monthly Collection Entry in Finance</h1>
+      <div class="subtitle">
+        At the start of each month, the system adds one credit entry per society to the Finance module, showing the money actually received in the previous month from all bill collections. Gateway payments count at the amount Easebuzz settles, after its charges.
+      </div>
+      <div class="meta-bar">
+        <div class="meta-item"><strong>Document Type:</strong> Business Requirement Document (BRD)</div>
+        <div class="meta-item"><strong>Scope:</strong> Backend &bull; Frontend &bull; Admin console</div>
+        <div class="meta-item"><strong>Review Status:</strong> <span class="pill pill-amber" style="padding: 2px 8px; font-size: 0.75rem;">In Review &bull; Not Approved Yet</span></div>
+        <div class="meta-item"><strong>Last Updated:</strong> 3 Nov 2026 IST</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+
+    <aside class="toc-sidebar">
+      <div class="toc-title">📑 BRD Contents</div>
+      <ul class="toc-list" style="padding-left: 0;">
+        <li><a href="#overview">1. Goal &amp; Summary</a></li>
+        <li><a href="#current-state">2. How It Works Today</a></li>
+        <li><a href="#rules">3. Business Rules</a></li>
+        <li><a href="#counted">4. What Gets Counted</a></li>
+        <li><a href="#amount">5. Amount Calculation</a></li>
+        <li><a href="#monthly-job">6. Monthly Job</a></li>
+        <li><a href="#past-months">7. Past Months &amp; Pop-up</a></li>
+        <li><a href="#delete-relog">8. Delete &amp; Re-log</a></li>
+        <li><a href="#notifications">9. Notifications &amp; Logs</a></li>
+        <li><a href="#flags">10. Feature Flags</a></li>
+        <li><a href="#data-model">11. Data Model Changes</a></li>
+        <li><a href="#apis">12. API Changes</a></li>
+        <li><a href="#ui">13. UI Changes</a></li>
+        <li><a href="#edge-cases">14. Edge Cases</a></li>
+        <li><a href="#open-items">15. Open Items</a></li>
+        <li><a href="#files">16. Affected Files</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+
+      <!-- 1. Goal & Summary -->
+      <section id="overview">
+        <h2>1. Goal &amp; Summary</h2>
+        <p>
+          Society admins use the Finance module (backend name: <code>expense</code>) to record credits and debits. Today every entry is added by hand, so the income from bill collections isn't there unless an admin types it in. The figure they would type is also wrong for online payments: Easebuzz keeps a fee and GST, so the society receives less than the bill amount.
+        </p>
+        <div class="callout info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-content">
+            <div class="callout-title">Goal</div>
+            Give the admin a clear, correct figure for how much income came into the society in a given month through bill collections, in the same place they track all other finances.
+          </div>
+        </div>
+        <h3>In one line</h3>
+        <p>
+          At the start of each month, the system adds <strong>one credit entry per society</strong> to Finance. The entry is dated the <strong>last day of the previous month</strong> and holds the money received from every payment completed in that month, with a breakdown by payment type.
+        </p>
+        <h3>Out of scope</h3>
+        <ul>
+          <li>Changing how bills are created, paid or approved.</li>
+          <li>Refund and chargeback handling (see <a href="#open-items">Open Items</a>).</li>
+          <li>Separate entries per bill type. One combined entry for now; a split may come later.</li>
+        </ul>
+      </section>
+
+      <!-- 2. How It Works Today -->
+      <section id="current-state">
+        <h2>2. How It Works Today</h2>
+
+        <h3>Finance module (<code>expense</code>)</h3>
+        <ul>
+          <li><strong>Model</strong> <code>expense.model.js</code>: <code>user_id</code> (required, the admin who added it), <code>purpose</code>, <code>amount</code>, <code>transaction_type</code> (<code>cash</code> | <code>cheque</code> | <code>online</code>, required), <code>type</code> (<code>credit</code> | <code>debit</code>), <code>society_id</code>, <code>media_ids</code>, <code>date_of_expense</code>, <code>cheque_number</code>, <code>is_active</code> (soft delete).</li>
+          <li><strong>Routes</strong> under <code>/society/expense</code>: <code>POST /create-society-expense</code>, <code>GET /get-society-expenses/:society_id</code>, <code>PUT /delete-society-expense/:expense_id</code> (soft delete), plus report summary and Excel/PDF exports. Entries can be added and deleted but not edited.</li>
+          <li><strong>Create flow</strong>: checks the caller is an active society admin, saves the entry, writes an activity log (<code>EXPENSE_CREATED</code>), then notifies society members. Members are skipped when <code>society.is_expense_management_enabled_for_member</code> is off.</li>
+          <li><strong>Totals</strong>: the listing adds up credits and debits into profit/loss. A system credit entry flows into these totals with no extra work.</li>
+        </ul>
+        <div class="callout warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <div class="callout-title">Gap</div>
+            Nothing on an entry says it was created by the system or which month it covers, so today we can't tell system entries apart from manual ones or stop duplicates.
+          </div>
+        </div>
+
+        <h3>Payments (<code>transaction</code>)</h3>
+        <ul>
+          <li><code>module_type</code>: <code>maintenance</code>, <code>special_bill</code>, <code>member_charge</code>, <code>subscription</code>, <code>ai_subscription</code>, <code>vendor_credit</code>.</li>
+          <li><code>transaction_type</code>: <code>cash</code>, <code>cheque</code>, <code>online</code> (paid outside the app, receipt uploaded and approved by the admin), <code>gateway</code> (Easebuzz).</li>
+          <li>Completed statuses: <code>success</code>, <code>approved</code>.</li>
+          <li><code>approved_at</code> is set when a payment becomes success/approved, by the gateway callback or by admin approval. Payments the admin records directly get it at creation.</li>
+          <li><code>maintenance_id</code> is an array: <strong>one payment can cover several bills</strong>.</li>
+        </ul>
+
+        <h3>The Easebuzz object (<code>payment_gateway_response</code>)</h3>
+        <p>The gateway callback handler in <code>transaction.service.js</code> stores these Easebuzz fields on every gateway payment:</p>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Stored key</th><th>Easebuzz field</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>payment_amount</code></td><td><code>amount</code></td><td>What the member paid</td></tr>
+              <tr><td><code>service_fee</code></td><td><code>service_charge</code></td><td>Easebuzz fee</td></tr>
+              <tr><td><code>service_tax</code></td><td><code>service_tax</code></td><td>GST on the fee</td></tr>
+              <tr><td><code>net_amount_debit</code></td><td><code>net_amount_debit</code></td><td>Amount debited from the payer</td></tr>
+              <tr><td><code>settlement_amount</code></td><td><code>settlement_amount</code></td><td>Amount settled to the society (to verify, see <a href="#open-items">Open Items</a>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Easebuzz rates can differ by payment mode (UPI, card, netbanking), so we use these stored figures and never calculate the fee with a fixed percentage.</p>
+
+        <h3>Existing reports</h3>
+        <p>
+          The Maintenance Collection Report groups paid bills by <strong>bill month</strong> and shows the full bill amount. The Transaction Report filters by <strong>payment date</strong>. This feature follows payment completion date, so its figure will match neither report's gross figure exactly.
+        </p>
+      </section>
+
+      <!-- 3. Business Rules -->
+      <section id="rules">
+        <h2>3. Business Rules</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Rule</th></tr></thead>
+            <tbody>
+              <tr><td>R1</td><td>One system credit entry per society per month, created automatically.</td></tr>
+              <tr><td>R2</td><td>The entry is dated the <strong>last day of the month</strong> it covers (IST).</td></tr>
+              <tr><td>R3</td><td>A payment belongs to the month in which it was <strong>completed</strong>, not the month of the bill it pays.</td></tr>
+              <tr><td>R4</td><td>All society bill collections count: maintenance, special bills, water charges, advance payments, place bookings and dues. See <a href="#counted">section 4</a>.</td></tr>
+              <tr><td>R5</td><td>Cash, cheque and manual online payments count at their full amount.</td></tr>
+              <tr><td>R6</td><td>Gateway payments count at the amount actually received, taken from the Easebuzz object on the payment.</td></tr>
+              <tr><td>R7</td><td>The entry carries a breakdown by payment type so it can be audited.</td></tr>
+              <tr><td>R8</td><td>The entry is owned by the <strong>system</strong>, not by any admin.</td></tr>
+              <tr><td>R9</td><td>Months with no collections get no entry.</td></tr>
+              <tr><td>R10</td><td>Admins can delete a system entry, and can log any past month again from the create form.</td></tr>
+              <tr><td>R11</td><td>Past months of the <strong>current financial year</strong> are backfilled once, and admins are told about it with a pop-up.</td></tr>
+              <tr><td>R12</td><td>Notifications follow the society's existing Finance visibility setting. Backfilled months send no notifications.</td></tr>
+              <tr><td>R13</td><td>No new collection. An activity log is written whenever a system entry is added.</td></tr>
+              <tr><td>R14</td><td>The feature is controlled by a global flag and a society-level flag.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4. What Gets Counted -->
+      <section id="counted">
+        <h2>4. What Gets Counted</h2>
+        <p>
+          We add up <strong>payments</strong>, not bills. One payment can cover several bills. Bills covered by an advance payment get marked paid without any new money coming in (<code>include_in_advance_payment</code>). Counting payments means each rupee is counted once, in the month it was received.
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Source</th><th>Stored as</th><th>Counted?</th></tr></thead>
+            <tbody>
+              <tr><td>Monthly maintenance bills</td><td><code>module_type: maintenance</code></td><td><span class="pill pill-green">Yes</span></td></tr>
+              <tr><td>Water charges</td><td>Part of the maintenance bill (<code>water_unit</code>, <code>water_unit_price</code>)</td><td><span class="pill pill-green">Yes</span> (covered by the bill payment)</td></tr>
+              <tr><td>Special bills</td><td><code>module_type: special_bill</code></td><td><span class="pill pill-green">Yes</span></td></tr>
+              <tr><td>Place bookings paid online</td><td><code>module_type: special_bill</code>, empty <code>maintenance_id</code></td><td><span class="pill pill-green">Yes</span></td></tr>
+              <tr><td>Advance payments</td><td>Linked from <code>advancePayment.transaction_id</code></td><td><span class="pill pill-green">Yes</span>, in the month the advance was paid</td></tr>
+              <tr><td>Dues / late charges</td><td><code>module_type: member_charge</code></td><td><span class="pill pill-green">Yes</span></td></tr>
+              <tr><td>Society subscription, AI subscription</td><td><code>subscription</code>, <code>ai_subscription</code></td><td><span class="pill pill-red">No</span> (paid to the platform)</td></tr>
+              <tr><td>Vendor wallet</td><td><code>vendor_credit</code></td><td><span class="pill pill-red">No</span> (vendor money)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Which payments</h3>
+        <ul>
+          <li>Status <code>success</code> or <code>approved</code>.</li>
+          <li><code>approved_at</code> falls inside the month, using IST month boundaries (<code>dayjsIst().startOf("month")</code> to <code>endOf("month")</code>).</li>
+          <li>Belongs to the society.</li>
+        </ul>
+      </section>
+
+      <!-- 5. Amount Calculation -->
+      <section id="amount">
+        <h2>5. Amount Calculation</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Payment type</th><th>Gross</th><th>Deductions</th><th>Net (counted)</th></tr></thead>
+            <tbody>
+              <tr><td><code>cash</code></td><td><code>amount</code></td><td>None</td><td><code>amount</code></td></tr>
+              <tr><td><code>cheque</code></td><td><code>amount</code></td><td>None</td><td><code>amount</code></td></tr>
+              <tr><td><code>online</code> (manual)</td><td><code>amount</code></td><td>None</td><td><code>amount</code></td></tr>
+              <tr><td><code>gateway</code></td><td><code>payment_amount</code></td><td><code>service_fee</code> + <code>service_tax</code></td><td>Easebuzz net figure (field to confirm)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Entry amount</strong> = sum of the net figure across all counted payments.</p>
+        <div class="callout warning">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-content">
+            <div class="callout-title">To verify before build</div>
+            Which stored field is the true settled amount: <code>settlement_amount</code>, or <code>payment_amount − service_fee − service_tax</code>? We must check that they agree on real dev data and how often the fields are missing on older payments. If a gateway payment has no fee data, the job logs it and counts it by the agreed fallback rule.
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Monthly Job -->
+      <section id="monthly-job">
+        <h2>6. Monthly Job</h2>
+        <h3>Schedule</h3>
+        <p>
+          The job runs on the <strong>1st of each month</strong> for the month that just ended. Running at 00:00 is risky: several jobs already run then, and payments completed in the last minutes of the month could be missed. The early-morning slots already in use (IST):
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Time</th><th>Existing jobs</th></tr></thead>
+            <tbody>
+              <tr><td>00:00</td><td>Recharge plan expiry, due charges check, hourly support-chat SLA and vendor review lock, 4-hourly WhatsApp retry</td></tr>
+              <tr><td>00:05</td><td>No-show guest expiry</td></tr>
+              <tr><td>01:00 / 01:30</td><td>Analytics metrics / analytics buckets</td></tr>
+              <tr><td>02:00</td><td>Vendor score, analytics retention, <strong>monthly society health snapshot (1st only)</strong></td></tr>
+              <tr><td>03:00 / 03:30</td><td>Vendor tag backfill / FCM orphan cleanup</td></tr>
+              <tr><td>04:00</td><td>Vendor temp area cleanup, WhatsApp retry</td></tr>
+              <tr><td>04:30 (prod)</td><td>Database export (heavy)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout success">
+          <div class="callout-icon">🕔</div>
+          <div class="callout-content">
+            <div class="callout-title">Proposed: 05:20 IST on the 1st (<code>"0 20 5 1 * *"</code>)</div>
+            05:00–06:59 has no daily job. 05:20 runs after the database export and avoids the :00, :10, :15 and :30 marks used by recurring jobs.
+          </div>
+        </div>
+
+        <h3>Flow</h3>
+        <div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-title">Check the global flag</div><div class="step-desc">If the feature is off platform-wide, log and stop.</div></div></div>
+        <div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-title">Load societies with the society flag on</div><div class="step-desc">Process them in batches so one large run doesn't load the server.</div></div></div>
+        <div class="step-card"><div class="step-num">3</div><div class="step-body"><div class="step-title">Skip if the month already has an entry</div><div class="step-desc">Any system entry for that society and month, <strong>including a deleted one</strong>, means skip. A deleted month only comes back through a manual re-log.</div></div></div>
+        <div class="step-card"><div class="step-num">4</div><div class="step-body"><div class="step-title">Add up the month's payments</div><div class="step-desc">Apply sections 4 and 5. Build the per-type breakdown and the list of payments counted.</div></div></div>
+        <div class="step-card"><div class="step-num">5</div><div class="step-body"><div class="step-title">Skip empty months</div><div class="step-desc">No payments, no entry.</div></div></div>
+        <div class="step-card"><div class="step-num">6</div><div class="step-body"><div class="step-title">Create the entry, log it, notify</div><div class="step-desc">Create the credit entry dated the last day of the month, write the activity log, and send notifications per the society setting.</div></div></div>
+        <div class="step-card"><div class="step-num">7</div><div class="step-body"><div class="step-title">Isolate failures</div><div class="step-desc">One society failing is logged and doesn't stop the others. The whole job sits in try/catch like every existing cron, since an unhandled rejection shuts the process down.</div></div></div>
+      </section>
+
+      <!-- 7. Past Months & Pop-up -->
+      <section id="past-months">
+        <h2>7. Past Months &amp; Pop-up</h2>
+        <p>
+          Many societies use Finance for their audit report, so we can't silently add months of entries. We backfill once and tell admins clearly.
+        </p>
+        <ul>
+          <li><strong>Range:</strong> the current Indian financial year (1 April to 31 March), up to the last completed month. If run in November 2026, that's April–October 2026. From then on the monthly job takes over.</li>
+          <li><strong>How:</strong> a one-time run of the same calculation code, one entry per month with collections, for each society with the flag on.</li>
+          <li><strong>No notifications</strong> for backfilled entries.</li>
+          <li><strong>Pop-up:</strong> society admins see a pop-up explaining that past months were added and can be deleted if not wanted. It shows until that admin opens the Finance module. Seen status is saved on the server per admin, so it doesn't come back on another device.</li>
+        </ul>
+        <div class="callout danger">
+          <div class="callout-icon">🛑</div>
+          <div class="callout-content">
+            <div class="callout-title">Production safety</div>
+            The backfill writes to many societies at once. It runs on production only with explicit approval, after a dry run on dev, and the dry run's figures are checked first.
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. Delete & Re-log -->
+      <section id="delete-relog">
+        <h2>8. Delete &amp; Re-log</h2>
+        <ul>
+          <li><strong>Delete:</strong> admins delete a system entry the same way as any entry (soft delete, <code>is_active: false</code>).</li>
+          <li><strong>Re-log:</strong> the create form gets an option to log the system entry for a chosen month. The backend calculates the figures with the same code as the monthly job. Nothing is entered by hand.</li>
+        </ul>
+        <h3>Re-log is refused when</h3>
+        <ul>
+          <li>The month isn't over yet.</li>
+          <li>The month already has an active system entry.</li>
+          <li>The month has no collections.</li>
+          <li>The feature is off for the society.</li>
+        </ul>
+        <p>The form can list the months that can be re-logged (past months with collections and no active entry), so the admin doesn't have to guess.</p>
+      </section>
+
+      <!-- 9. Notifications & Logs -->
+      <section id="notifications">
+        <h2>9. Notifications &amp; Logs</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Trigger</th><th>Notification</th><th>Activity log</th></tr></thead>
+            <tbody>
+              <tr><td>Monthly job</td><td>Yes. Members only when <code>is_expense_management_enabled_for_member</code> is on (default on, editable by the admin).</td><td>Yes, no user (system)</td></tr>
+              <tr><td>Backfill</td><td>No</td><td>Yes, no user (system)</td></tr>
+              <tr><td>Manual re-log</td><td>Same as monthly job (proposed)</td><td>Yes, the admin who re-logged</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The activity log model already allows entries without a user ("optional for system-generated logs"), so no change is needed there.</p>
+      </section>
+
+      <!-- 10. Feature Flags -->
+      <section id="flags">
+        <h2>10. Feature Flags</h2>
+        <p>The feature reaches every society, behind two flags, following the existing staff-attendance pattern:</p>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Level</th><th>Where</th><th>Who toggles</th></tr></thead>
+            <tbody>
+              <tr><td>Global</td><td>New field in <code>PlatformConfig</code> (single config document, read through a short cache)</td><td>Super admin, ebuilding-admin console</td></tr>
+              <tr><td>Society</td><td>New boolean on the <code>society</code> model</td><td>Super admin, per society</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>One helper evaluates both and returns <code>{ enabled, reason }</code> (<code>GLOBAL_DISABLED</code> / <code>SOCIETY_DISABLED</code>), like <code>evaluateStaffAttendanceModuleStatus</code>. The monthly job, backfill, re-log endpoint and pop-up all use it.</p>
+        <div class="callout info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <div class="callout-title">Proposed default: society flag off</div>
+            Entries land in audit-sensitive Finance data, so societies are switched on deliberately and the backfill runs only for those.
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. Data Model Changes -->
+      <section id="data-model">
+        <h2>11. Data Model Changes</h2>
+        <h3><code>expense</code> (proposed additions)</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Field</th><th>Type</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><code>source</code></td><td>String enum: <code>manual</code> | <code>system</code>, default <code>manual</code></td><td>Tells system entries apart. Existing rows read as manual.</td></tr>
+              <tr><td><code>period</code></td><td>String <code>YYYY-MM</code></td><td>The month the system entry covers.</td></tr>
+              <tr><td><code>breakdown</code></td><td>Object</td><td>Per payment type: count, gross, fee, GST, net.</td></tr>
+              <tr><td><code>transaction_ids</code></td><td>ObjectId[] → Transaction</td><td>Every payment counted, so each figure can be traced and recalculated.</td></tr>
+              <tr><td><code>user_id</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>System ownership, same approach as the activity log.</td></tr>
+              <tr><td><code>transaction_type</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>One entry spans several payment types; the breakdown carries them.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Index:</strong> unique partial index on <code>{ society_id, source, period }</code> where <code>is_active: true</code> and <code>source: system</code>. This blocks duplicates and still allows re-logging a deleted month.</p>
+        <h3>Example <code>breakdown</code> (illustrative figures)</h3>
+        <pre><code>{
+  "cash":    { "count": 12, "gross": 36000,  "net": 36000 },
+  "cheque":  { "count": 3,  "gross": 9000,   "net": 9000 },
+  "online":  { "count": 2,  "gross": 6000,   "net": 6000 },
+  "gateway": { "count": 40, "gross": 120000, "service_fee": 240, "service_tax": 43.2, "net": 119716.8 }
+}
+// amount = 36000 + 9000 + 6000 + 119716.8 = 170716.8</code></pre>
+        <h3>Other models</h3>
+        <ul>
+          <li><code>PlatformConfig</code>: global flag field.</li>
+          <li><code>society</code>: society flag field.</li>
+          <li><code>societyAdmin</code> (proposed): pop-up seen flag per admin.</li>
+        </ul>
+        <div class="callout warning">
+          <div class="callout-icon">🔗</div>
+          <div class="callout-content">
+            <div class="callout-title">Shared contracts</div>
+            The expense model and list response are used by the frontend. These changes need an impact analysis and developer approval before implementation.
+          </div>
+        </div>
+      </section>
+
+      <!-- 12. API Changes -->
+      <section id="apis">
+        <h2>12. API Changes</h2>
+        <p>All society routes sit under <code>/society/expense</code> and use permission <code>EXPENSE_MANAGEMENT</code>. Names are proposed.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><span class="method-badge method-get">GET</span></td><td><code>/get-society-expenses/:society_id</code></td><td>Returns <code>source</code>, <code>period</code> and <code>breakdown</code> on system entries.</td><td><span class="pill pill-blue">MODIFIED</span></td></tr>
+              <tr><td><span class="method-badge method-put">PUT</span></td><td><code>/delete-society-expense/:expense_id</code></td><td>Works for system entries too. No change expected.</td><td><span class="pill pill-gray">EXISTING</span></td></tr>
+              <tr><td><span class="method-badge method-get">GET</span></td><td><code>/get-relog-months/:society_id</code></td><td>Lists past months that can be re-logged.</td><td><span class="pill pill-green">NEW</span></td></tr>
+              <tr><td><span class="method-badge method-post">POST</span></td><td><code>/relog-monthly-collection</code></td><td>Body <code>{ society_id, period }</code>. Calculates and creates the system entry. Permission <code>CREATE</code>.</td><td><span class="pill pill-green">NEW</span></td></tr>
+              <tr><td><span class="method-badge method-put">PUT</span></td><td><code>/mark-backfill-notice-seen/:society_id</code></td><td>Called when the admin opens Finance; hides the pop-up for that admin.</td><td><span class="pill pill-green">NEW</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The pop-up state and the society flag reach the frontend with data it already loads, either the Finance list response or the society details. Which one is decided in planning.</p>
+        <p>Admin console: get/set endpoints for the global flag and the society flag, following <code>staffAttendanceFeatureFlag.routes.js</code>.</p>
+      </section>
+
+      <!-- 13. UI Changes -->
+      <section id="ui">
+        <h2>13. UI Changes</h2>
+        <h3>Society app (Finance)</h3>
+        <ul>
+          <li>System entries show a "System" label and a readable purpose, e.g. "Collections for October 2026".</li>
+          <li>Opening a system entry shows the breakdown by payment type, including the gateway fee and GST.</li>
+          <li>Delete works as for other entries.</li>
+          <li>Create form: an option to log the system entry for a past month, with a month picker limited to months that can be re-logged.</li>
+          <li>Pop-up after backfill, until the admin opens Finance.</li>
+          <li>All new text in English, Hindi and Gujarati.</li>
+        </ul>
+        <h3>Admin console</h3>
+        <ul>
+          <li>Global toggle in Platform Config.</li>
+          <li>Per-society toggle.</li>
+        </ul>
+      </section>
+
+      <!-- 14. Edge Cases -->
+      <section id="edge-cases">
+        <h2>14. Edge Cases</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Case</th><th>Behaviour</th></tr></thead>
+            <tbody>
+              <tr><td>Payment completed at 23:59 on the last day</td><td>Counted. The job runs the next morning on IST month boundaries.</td></tr>
+              <tr><td>Cash payment submitted in October, approved in November</td><td>Counted in November (completion date).</td></tr>
+              <tr><td>One payment covering three bills</td><td>Counted once at the payment amount.</td></tr>
+              <tr><td>Bill settled from an existing advance</td><td>Not counted again. The advance was counted when it was paid.</td></tr>
+              <tr><td>Job runs twice for the same month</td><td>Second run skips; the month already has an entry.</td></tr>
+              <tr><td>Admin deleted the entry, job re-runs</td><td>Skipped. Only a manual re-log brings it back.</td></tr>
+              <tr><td>Gateway payment missing fee fields</td><td>Logged, counted by the agreed fallback (open item).</td></tr>
+              <tr><td>Older payment with no <code>approved_at</code></td><td>Fallback date needed (open item); matters for the backfill.</td></tr>
+              <tr><td>Society flag turned off mid-year</td><td>No new entries. Existing entries stay.</td></tr>
+              <tr><td>Two re-log requests at the same moment</td><td>The unique index lets only one succeed; the other gets a clear "already logged" error.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 15. Open Items -->
+      <section id="open-items">
+        <h2>15. Open Items</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Item</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Which Easebuzz field is the settled amount, and the fallback when fee data is missing. Needs a dev data check.</td><td><span class="pill pill-amber">To verify</span></td></tr>
+              <tr><td>2</td><td>Fallback completion date for payments with no <code>approved_at</code>.</td><td><span class="pill pill-amber">To verify</span></td></tr>
+              <tr><td>3</td><td>Job time 05:20 IST on the 1st.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
+              <tr><td>4</td><td>System entries have no user and no single payment type.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
+              <tr><td>5</td><td>Breakdown shape and <code>transaction_ids</code> on the entry.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
+              <tr><td>6</td><td>Society flag defaults to off.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
+              <tr><td>7</td><td>Re-logged entries notify like the monthly job.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
+              <tr><td>8</td><td>Refunds and chargebacks after an entry is created.</td><td><span class="pill pill-gray">Out of scope for now</span></td></tr>
+              <tr><td>9</td><td>Filtering Finance by payment type won't match system entries, since they have none.</td><td><span class="pill pill-blue">Accepted trade-off</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 16. Affected Files -->
+      <section id="files">
+        <h2>16. Affected Files</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>File</th><th>Status</th><th>Change</th></tr></thead>
+            <tbody>
+              <tr><td><code>backend: src/modules/society/submodules/expense/expense.model.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>New fields and index</td></tr>
+              <tr><td><code>backend: src/config/expense.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td><code>source</code> enum</td></tr>
+              <tr><td><code>backend: .../expense/expense.service.js, expense.dao.js, expense.routes.js, expense.controller.js, expense.doc.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Monthly calculation, re-log, notice-seen, Swagger</td></tr>
+              <tr><td><code>backend: .../transaction/transaction.dao.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Query for completed payments in a month</td></tr>
+              <tr><td><code>backend: src/config/cron-jobs.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>New monthly job</td></tr>
+              <tr><td><code>backend: src/modules/platform/platformConfig.model.js</code> + new flag service/routes</td><td><span class="pill pill-green">NEW</span></td><td>Global flag</td></tr>
+              <tr><td><code>backend: src/modules/society/society.model.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Society flag</td></tr>
+              <tr><td><code>backend: .../societyAdmin/societyAdmin.model.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Pop-up seen flag</td></tr>
+              <tr><td><code>backend: scripts/</code> backfill script</td><td><span class="pill pill-green">NEW</span></td><td>One-time current-FY backfill</td></tr>
+              <tr><td><code>frontend: src/services/society-management/expenses/*</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>System label, breakdown, re-log option, pop-up, types, i18n</td></tr>
+              <tr><td><code>admin: src/modules/PlatformConfig/*</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Global and society toggles</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    Business Requirement Document (BRD) &bull; E Building Society Management System &bull; November 2026
+  </footer>
+
+</body>
+</html>
