@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reference - Scheduled Jobs (Cron) Timings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --secondary: #64748b;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --border-card: #e2e8f0;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --warning-border: #fde68a;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --success-border: #a7f3d0;
+      --info: #0ea5e9;
+      --info-light: #f0f9ff;
+      --info-border: #bae6fd;
+      --code-bg: #1e293b;
+      --code-text: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.65;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 48px 32px;
+      border-bottom: 4px solid var(--primary);
+    }
+
+    .header-container { max-width: 1200px; margin: 0 auto; }
+
+    .badge-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(254, 243, 199, 0.2);
+      border: 1px solid #fde68a;
+      color: #fef3c7;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .subtitle { font-size: 1.15rem; color: #94a3b8; max-width: 850px; line-height: 1.55; }
+    .subtitle code { background: rgba(255,255,255,0.08); color: #e2e8f0; border-color: rgba(255,255,255,0.15); }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.875rem;
+      color: #cbd5e1;
+    }
+
+    .meta-item strong { color: white; }
+
+    .main-layout {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 24px 64px 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 36px;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 1fr; padding: 0 16px 48px 16px; }
+      .toc-sidebar { display: none; }
+      header { padding: 32px 16px; }
+      h1 { font-size: 1.8rem; }
+      section { padding: 22px; }
+    }
+
+    .toc-sidebar {
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .toc-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--secondary);
+      margin-bottom: 16px;
+    }
+
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+    .toc-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: block;
+    }
+
+    .toc-list a:hover { color: var(--primary); background: var(--primary-light); }
+
+    .content-area { min-width: 0; }
+
+    section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    h3 { font-size: 1.22rem; font-weight: 700; color: #1e293b; margin: 24px 0 12px 0; }
+
+    p { color: var(--text-muted); font-size: 0.975rem; margin-bottom: 16px; }
+
+    ul, ol { color: var(--text-muted); font-size: 0.95rem; padding-left: 22px; margin-bottom: 16px; }
+    li { margin-bottom: 6px; }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+    }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+    thead { background: #f1f5f9; }
+
+    th {
+      padding: 12px 16px;
+      font-weight: 700;
+      color: #334155;
+      border-bottom: 1px solid var(--border-card);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      overflow-wrap: anywhere;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    pre code { background: transparent; color: inherit; padding: 0; border: none; }
+
+    .callout {
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      font-size: 0.95rem;
+    }
+
+    .callout-icon { font-size: 1.4rem; line-height: 1; }
+    .callout-content { flex: 1; min-width: 0; }
+    .callout-title { font-weight: 700; margin-bottom: 4px; }
+    .callout ul { color: inherit; margin: 6px 0 0 0; }
+
+    .callout.danger { background: var(--danger-light); border: 1px solid var(--danger-border); color: #991b1b; }
+    .callout.danger .callout-title { color: #b91c1c; }
+    .callout.warning { background: var(--warning-light); border: 1px solid var(--warning-border); color: #92400e; }
+    .callout.warning .callout-title { color: #b45309; }
+    .callout.info { background: var(--info-light); border: 1px solid var(--info-border); color: #075985; }
+    .callout.info .callout-title { color: #0284c7; }
+    .callout.success { background: var(--success-light); border: 1px solid var(--success-border); color: #065f46; }
+    .callout.success .callout-title { color: #059669; }
+
+    .method-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+    .method-get { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .method-post { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .method-put { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .pill-blue { background: #dbeafe; color: #1d4ed8; }
+    .pill-green { background: #dcfce7; color: #15803d; }
+    .pill-red { background: #fee2e2; color: #b91c1c; }
+    .pill-amber { background: #fef3c7; color: #b45309; }
+    .pill-gray { background: #f1f5f9; color: #475569; }
+
+    .step-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      display: flex;
+      gap: 16px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .step-body { flex: 1; min-width: 0; }
+    .step-title { font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--secondary);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-card);
+      background: white;
+    }
+  
+    .slot-grid { display: grid; grid-template-columns: 72px 1fr; border: 1px solid var(--border-card); border-radius: 12px; overflow: hidden; margin: 20px 0; font-size: 0.88rem; }
+    .slot-hour { padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #334155; background: #f8fafc; border-bottom: 1px solid #f1f5f9; }
+    .slot-jobs { padding: 6px 12px; border-bottom: 1px solid #f1f5f9; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 36px; }
+    .slot-free { background: var(--success-light); }
+    .slot-free .slot-hour { background: #d1fae5; color: #065f46; }
+    .chip { display: inline-flex; gap: 6px; align-items: center; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; background: #dbeafe; color: #1e3a8a; border: 1px solid #bfdbfe; }
+    .chip b { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    .chip-heavy { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+    .chip-monthly { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
+    .chip-4h { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .free-label { color: #047857; font-size: 0.8rem; font-weight: 600; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 0 0; }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="badge-header">⚙️ CURRENT SYSTEM &bull; REFERENCE</div>
+      <h1>Scheduled Jobs (Cron) Timings</h1>
+      <div class="subtitle">
+        Every scheduled job the backend runs today, with its time in IST. Use it to pick a free slot for a new job, such as the Finance monthly collection entry.
+      </div>
+      <div class="meta-bar">
+        <div class="meta-item"><strong>Source:</strong> <code>society-management-backend/src/config/cron-jobs.js</code>, <code>src/utils/cron-jobs.js</code>, <code>src/server.js</code></div>
+        <div class="meta-item"><strong>Code version:</strong> <code>develop</code> d4303376 (same schedules as <code>release/v2.5.1</code>)</div>
+        <div class="meta-item"><strong>Timezone:</strong> Asia/Kolkata (IST) for every job</div>
+        <div class="meta-item"><strong>Last Updated:</strong> 4 Nov 2026 IST</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+
+    <aside class="toc-sidebar">
+      <div class="toc-title">📑 Contents</div>
+      <ul class="toc-list" style="padding-left: 0;">
+        <li><a href="#where">1. Where Jobs Run</a></li>
+        <li><a href="#day">2. 24-Hour View</a></li>
+        <li><a href="#daily">3. Daily Jobs</a></li>
+        <li><a href="#recurring">4. Recurring Jobs</a></li>
+        <li><a href="#monthly">5. Monthly Jobs</a></li>
+        <li><a href="#free">6. Free Slots</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+
+      <section id="where">
+        <h2>1. Where Jobs Run</h2>
+        <ul>
+          <li>Every deployed environment (production, staging, dev server) starts all jobs. A developer's machine (<code>NODE_ENV=local</code>) starts only the maintenance bill reminder.</li>
+          <li><strong>Database export</strong> is the one job whose time depends on the environment: daily at 04:30 on production, monthly on the 1st at 00:00 elsewhere.</li>
+          <li><strong>Backfill maintenance</strong> runs every 30 minutes but does nothing unless <code>NODE_ENV</code> is production or development and <code>BACKFILL_MAINTENANCE_CRON_ENABLED</code> isn't <code>false</code>.</li>
+          <li>Jobs are created stopped in <code>cron-jobs.js</code> and started in <code>server.js</code>.</li>
+        </ul>
+        <p>26 jobs in total: 17 daily, 8 recurring through the day, 2 monthly (the database export counts once as daily on production and once as monthly elsewhere).</p>
+      </section>
+
+      <section id="day">
+        <h2>2. 24-Hour View</h2>
+        <p>Daily and monthly jobs by hour. Green hours have none. Recurring jobs (every minute, every 15/30 minutes, hourly at :00 and :10) run in every hour and are listed in <a href="#recurring">section 4</a>.</p>
+        <div class="legend">
+          <span class="chip"><b>HH:MM</b>Daily</span>
+          <span class="chip chip-heavy"><b>HH:MM</b>Daily, heavy</span>
+          <span class="chip chip-monthly"><b>HH:MM</b>1st of month only</span>
+          <span class="chip chip-4h"><b>HH:00</b>Every 4 hours</span>
+        </div>
+        <div class="slot-grid">
+          <div class="slot-hour">00:00</div><div class="slot-jobs"><span class="chip"><b>00:00</b>Recharge plan expiry</span><span class="chip"><b>00:00</b>Due charges check</span><span class="chip"><b>00:05</b>No-show guest expiry</span><span class="chip chip-monthly"><b>00:00</b>Database export (dev/staging only) · 1st only</span><span class="chip chip-4h"><b>00:00</b>WhatsApp retry</span></div>
+          <div class="slot-hour">01:00</div><div class="slot-jobs"><span class="chip chip-heavy"><b>01:00</b>Analytics daily metrics</span><span class="chip"><b>01:30</b>Analytics frequency buckets</span></div>
+          <div class="slot-hour">02:00</div><div class="slot-jobs"><span class="chip"><b>02:00</b>Vendor score recompute</span><span class="chip"><b>02:00</b>Analytics retention cohorts</span><span class="chip chip-monthly"><b>02:00</b>Society health monthly snapshot · 1st only</span></div>
+          <div class="slot-hour">03:00</div><div class="slot-jobs"><span class="chip"><b>03:00</b>Vendor tag aggregation backfill</span><span class="chip"><b>03:30</b>FCM orphan cleanup</span></div>
+          <div class="slot-hour">04:00</div><div class="slot-jobs"><span class="chip"><b>04:00</b>Vendor temp service area cleanup</span><span class="chip chip-heavy"><b>04:30</b>Database export (prod only)</span><span class="chip chip-4h"><b>04:00</b>WhatsApp retry</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">05:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">06:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour">07:00</div><div class="slot-jobs"><span class="chip"><b>07:00</b>Subscription cron</span></div>
+          <div class="slot-hour">08:00</div><div class="slot-jobs"><span class="chip"><b>08:00</b>Maintenance bill reminders</span><span class="chip"><b>08:00</b>WhatsApp due-payment reminders</span><span class="chip"><b>08:00</b>WhatsApp special bill reminders</span><span class="chip chip-4h"><b>08:00</b>WhatsApp retry</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">09:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour">10:00</div><div class="slot-jobs"><span class="chip"><b>10:00</b>Personal reminders</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">11:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour">12:00</div><div class="slot-jobs"><span class="chip chip-4h"><b>12:00</b>WhatsApp retry</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">13:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">14:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">15:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour">16:00</div><div class="slot-jobs"><span class="chip chip-4h"><b>16:00</b>WhatsApp retry</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">17:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">18:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">19:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour">20:00</div><div class="slot-jobs"><span class="chip chip-4h"><b>20:00</b>WhatsApp retry</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">21:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour" style="background:#d1fae5;color:#065f46">22:00</div><div class="slot-jobs slot-free"><span class="free-label">No daily or monthly job (only the every-minute / 15 / 30 / hourly ones)</span></div>
+          <div class="slot-hour">23:00</div><div class="slot-jobs"><span class="chip"><b>23:59</b>Expire pending place bookings</span></div>
+        </div>
+      </section>
+
+      <section id="daily">
+        <h2>3. Daily Jobs</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Time (IST)</th><th>Job</th><th>Cron</th><th>Function</th><th>Note</th></tr></thead>
+            <tbody>
+              <tr><td><strong>00:00</strong></td><td>Recharge plan expiry</td><td><code>0 0 * * *</code></td><td><code>expireExpiredPlans + unlimited-plan + lead purchase expiry</code></td><td>Vendor</td></tr>
+              <tr><td><strong>00:00</strong></td><td>Due charges check</td><td><code>0 0 * * *</code></td><td><code>checkDueCharges</code></td><td>Adds late charges to overdue bills</td></tr>
+              <tr><td><strong>00:05</strong></td><td>No-show guest expiry</td><td><code>5 0 * * *</code></td><td><code>expireNoShowGuests</code></td><td>Auto-rejects guests who never arrived</td></tr>
+              <tr><td><strong>01:00</strong></td><td>Analytics daily metrics</td><td><code>0 1 * * *</code></td><td><code>computeAllDailyMetrics</code></td><td>Yesterday's society metrics</td></tr>
+              <tr><td><strong>01:30</strong></td><td>Analytics frequency buckets</td><td><code>30 1 * * *</code></td><td><code>computeFrequencyBuckets</code></td><td></td></tr>
+              <tr><td><strong>02:00</strong></td><td>Vendor score recompute</td><td><code>0 2 * * *</code></td><td><code>nightlyScoreRecomputeJob</code></td><td></td></tr>
+              <tr><td><strong>02:00</strong></td><td>Analytics retention cohorts</td><td><code>0 2 * * *</code></td><td><code>computeRetentionCohorts</code></td><td>Must run after buckets</td></tr>
+              <tr><td><strong>03:00</strong></td><td>Vendor tag aggregation backfill</td><td><code>0 3 * * *</code></td><td><code>tagAggregationBackfillJob</code></td><td></td></tr>
+              <tr><td><strong>03:30</strong></td><td>FCM orphan cleanup</td><td><code>30 3 * * *</code></td><td><code>cleanupOrphanedFcmDocs</code></td><td></td></tr>
+              <tr><td><strong>04:00</strong></td><td>Vendor temp service area cleanup</td><td><code>0 0 4 * * *</code></td><td><code>cleanupTemporaryAreas</code></td><td></td></tr>
+              <tr><td><strong>04:30</strong></td><td>Database export (prod only)</td><td><code>0 30 4 * * *</code></td><td><code>exportCollections</code></td><td>Heavy; dev/staging run it monthly instead</td></tr>
+              <tr><td><strong>07:00</strong></td><td>Subscription cron</td><td><code>0 7 * * *</code></td><td><code>handleSubscriptionCron</code></td><td>Expiry, activation, emails</td></tr>
+              <tr><td><strong>08:00</strong></td><td>Maintenance bill reminders</td><td><code>0 0 8 * * *</code></td><td><code>getReminderMaintenanceBills</code></td><td>Also runs on local</td></tr>
+              <tr><td><strong>08:00</strong></td><td>WhatsApp due-payment reminders</td><td><code>0 0 8 * * *</code></td><td><code>sendDuePaymentReminderForAll</code></td><td></td></tr>
+              <tr><td><strong>08:00</strong></td><td>WhatsApp special bill reminders</td><td><code>0 0 8 * * *</code></td><td><code>sendSpecialBillReminderForAll</code></td><td></td></tr>
+              <tr><td><strong>10:00</strong></td><td>Personal reminders</td><td><code>0 0 10 * * *</code></td><td><code>triggerDueReminders</code></td><td></td></tr>
+              <tr><td><strong>23:59</strong></td><td>Expire pending place bookings</td><td><code>0 59 23 * * *</code></td><td><code>expirePendingBookings</code></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="recurring">
+        <h2>4. Recurring Jobs</h2>
+        <p>These run many times a day, so every hour has them. The busy minute marks are <strong>:00, :10, :15, :30 and :45</strong>.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>When</th><th>Job</th><th>Cron</th><th>Function</th></tr></thead>
+            <tbody>
+              <tr><td>Every minute</td><td>Communication campaigns</td><td><code>* * * * *</code></td><td><code>processPendingCampaigns</code></td></tr>
+              <tr><td>Every minute</td><td>Service booking dispatch scanner</td><td><code>* * * * *</code></td><td><code>runDispatchScanner</code></td></tr>
+              <tr><td>Every 15 min (:00 :15 :30 :45)</td><td>Bulk order auto-close</td><td><code>*/15 * * * *</code></td><td><code>autoClosePastDeadline</code></td></tr>
+              <tr><td>Every 30 min (:00 :30)</td><td>Backfill maintenance (only when <code>BACKFILL_MAINTENANCE_CRON_ENABLED</code> isn't false, prod/dev)</td><td><code>0 */30 * * * *</code></td><td><code>runBackfillMaintenanceCronJob</code></td></tr>
+              <tr><td>Hourly at :00</td><td>Support chat SLA check</td><td><code>0 0 * * * *</code></td><td><code>checkSlaBreaches</code></td></tr>
+              <tr><td>Hourly at :00</td><td>Vendor review lock</td><td><code>0 0 * * * *</code></td><td><code>reviewLockJob</code></td></tr>
+              <tr><td>Hourly at :10</td><td>Notice reminders</td><td><code>10 * * * *</code></td><td><code>sendDueNoticeReminders</code></td></tr>
+              <tr><td>Every 4 hours (00, 04, 08, 12, 16, 20 at :00)</td><td>WhatsApp failed-message retry</td><td><code>0 0 */4 * * *</code></td><td><code>retryFailedMessages</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="monthly">
+        <h2>5. Monthly Jobs</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>When (IST)</th><th>Job</th><th>Cron</th><th>Function</th></tr></thead>
+            <tbody>
+              <tr><td><strong>1st, 00:00</strong></td><td>Database export (dev/staging only)</td><td><code>0 0 0 1 * *</code></td><td><code>exportCollections</code></td></tr>
+              <tr><td><strong>1st, 02:00</strong></td><td>Society health monthly snapshot</td><td><code>0 2 1 * *</code></td><td><code>runMonthlyHealthSnapshotJob</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="free">
+        <h2>6. Free Slots</h2>
+        <p>Hours with no daily or monthly job, for picking a time for a new one. Avoid minutes :00, :10, :15, :30 and :45 in any hour, where the recurring jobs fire.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Window (IST)</th><th>Before / after</th></tr></thead>
+            <tbody>
+              <tr><td><strong>05:00–06:59</strong></td><td>After the production database export (04:30); before the subscription cron (07:00).</td></tr>
+              <tr><td><strong>09:00–09:59</strong></td><td>After the 08:00 reminders; before personal reminders (10:00). Daytime traffic.</td></tr>
+              <tr><td><strong>11:00–23:58</strong></td><td>No daily job until the 23:59 place booking expiry. Daytime and evening traffic.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout info">
+          <div class="callout-icon">💰</div>
+          <div class="callout-content">
+            <div class="callout-title">For the Finance monthly collection entry</div>
+            It runs once on the 1st for the month that just ended. The BRD's current proposal is <strong>05:20 IST</strong> (inside the 05:00–06:59 window, after the database export, off the busy minute marks). See <a href="finance-monthly-collection-entry-brd.html#monthly-job">the BRD</a>.
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    Reference &bull; E Building Society Management System &bull; November 2026
+  </footer>
+
+</body>
+</html>
