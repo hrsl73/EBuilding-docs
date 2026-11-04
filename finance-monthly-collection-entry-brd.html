@@ -508,14 +508,13 @@
         <p><strong>Gateway charges</strong> = gateway gross − gateway net (counted), summed across the month's gateway payments.</p>
         <ul>
           <li>Calculated as gross minus net, not fee plus GST, so the three figures (gross, charges, received) always add up whichever settled field is confirmed in <a href="#open-items">Open Items</a>.</li>
-          <li>Gateway payments with no fee data are counted by the fallback rule. The entry notes how many there were, e.g. "Charges not available for 3 payments", so the charges figure isn't read as complete.</li>
           <li>Cash, cheque and manual online payments have no charges.</li>
         </ul>
         <div class="callout warning">
           <div class="callout-icon">🔍</div>
           <div class="callout-content">
             <div class="callout-title">To verify before build</div>
-            Which stored field is the true settled amount: <code>settlement_amount</code>, or <code>payment_amount − service_fee − service_tax</code>? We must check that they agree on real dev data and how often the fields are missing on older payments. If a gateway payment has no fee data, the job logs it and counts it by the agreed fallback rule.
+            Which stored field is the true settled amount: <code>settlement_amount</code>, or <code>payment_amount − service_fee − service_tax</code>? We must check that they agree on real dev data, and count successful gateway payments with empty fee fields. In the current code every successful gateway payment gets these fields from the Easebuzz webhook, so the count is expected to be zero. If older payments turn out to be missing them, that is handled in the past-months script, not in the monthly entry. If the job ever meets a payment with no fee data, it writes a server log for developers; admins see nothing extra.
           </div>
         </div>
       </section>
@@ -660,7 +659,7 @@
             <tbody>
               <tr><td><code>source</code></td><td>String enum: <code>manual</code> | <code>system</code>, default <code>manual</code></td><td>Tells system entries apart. Existing rows read as manual.</td></tr>
               <tr><td><code>period</code></td><td>String <code>YYYY-MM</code></td><td>The month the system entry covers.</td></tr>
-              <tr><td><code>breakdown</code></td><td>Object</td><td>Per payment type: count, gross, net. Gateway also has fee, GST, total charges (gross − net) and the count of payments with no fee data.</td></tr>
+              <tr><td><code>breakdown</code></td><td>Object</td><td>Per payment type: count, gross, net. Gateway also has fee, GST and total charges (gross − net).</td></tr>
               <tr><td><code>transaction_ids</code></td><td>ObjectId[] → Transaction</td><td>Every payment counted, so each figure can be traced and recalculated.</td></tr>
               <tr><td><code>user_id</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>System ownership, same approach as the activity log.</td></tr>
               <tr><td><code>transaction_type</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>One entry spans several payment types; the breakdown carries them.</td></tr>
@@ -674,7 +673,7 @@
   "cheque":  { "count": 3,  "gross": 9000,   "net": 9000 },
   "online":  { "count": 2,  "gross": 6000,   "net": 6000 },
   "gateway": { "count": 40, "gross": 120000, "service_fee": 240, "service_tax": 43.2,
-               "charges": 283.2, "missing_fee_count": 0, "net": 119716.8 }
+               "charges": 283.2, "net": 119716.8 }
 }
 // amount = 36000 + 9000 + 6000 + 119716.8 = 170716.8</code></pre>
         <h3>Other models</h3>
@@ -720,7 +719,7 @@
         <ul>
           <li>System entries show a "System" label and a readable purpose, e.g. "Collections for October 2026".</li>
           <li>The system entry shows the gateway charges on the entry itself, e.g. "Gateway collections ₹1,20,000 · Gateway charges −₹283.20 · Received ₹1,19,716.80".</li>
-          <li>Opening a system entry shows the breakdown by payment type, including the gateway fee and GST, plus the "charges not available for N payments" note when it applies.</li>
+          <li>Opening a system entry shows the breakdown by payment type, including the gateway fee and GST.</li>
           <li>Delete works as for other entries.</li>
           <li>Create form: an option to log the system entry for a past month, with a month picker limited to months that can be re-logged.</li>
           <li>Pop-up after backfill, until the admin opens Finance.</li>
@@ -750,7 +749,7 @@
               <tr><td>Bill settled from an existing advance</td><td>Not counted again. The advance was counted when it was paid.</td></tr>
               <tr><td>Job runs twice for the same month</td><td>Second run skips; the month already has an entry.</td></tr>
               <tr><td>Admin deleted the entry, job re-runs</td><td>Skipped. Only a manual re-log brings it back.</td></tr>
-              <tr><td>Gateway payment missing fee fields</td><td>Logged, counted by the agreed fallback (open item).</td></tr>
+              <tr><td>Gateway payment missing fee fields</td><td>Not expected in current code. If it happens, a server log is written for developers (open item 1).</td></tr>
               <tr><td>Older payment with no <code>approved_at</code></td><td>Fallback date needed (open item); matters for the backfill.</td></tr>
               <tr><td>Society toggle turned off mid-year</td><td>No new entries. Existing entries stay.</td></tr>
               <tr><td>Toggle turned on mid-month</td><td>The month-end run counts that <strong>whole month's</strong> collections, not only the days since the toggle went on.</td></tr>
@@ -770,7 +769,7 @@
           <table>
             <thead><tr><th>#</th><th>Item</th><th>Status</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Which Easebuzz field is the settled amount, and the fallback when fee data is missing. Needs a dev data check.</td><td><span class="pill pill-amber">To verify</span></td></tr>
+              <tr><td>1</td><td>Which Easebuzz field is the settled amount, and how many past gateway payments have empty fee fields (expected zero). Needs a dev data check.</td><td><span class="pill pill-amber">To verify</span></td></tr>
               <tr><td>2</td><td>Fallback completion date for payments with no <code>approved_at</code>.</td><td><span class="pill pill-amber">To verify</span></td></tr>
               <tr><td>3</td><td>Job time 05:20 IST on the 1st.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
               <tr><td>4</td><td>System entries have no user and no single payment type.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
