@@ -543,8 +543,8 @@
         <div class="callout success">
           <div class="callout-icon">🕔</div>
           <div class="callout-content">
-            <div class="callout-title">Proposed: 05:20 IST on the 1st (<code>"0 20 5 1 * *"</code>). Timing to be confirmed.</div>
-            05:00–06:59 has no daily job. 05:20 runs after the database export and avoids the :00, :10, :15 and :30 marks used by recurring jobs.
+            <div class="callout-title">Decided: 05:20 IST on the 1st (<code>"0 20 5 1 * *"</code>)</div>
+            05:00–06:59 has no daily job. 05:20 runs after the database export and avoids the :00, :10, :15, :30 and :45 marks used by recurring jobs. 02:xx was considered and rejected: three jobs start at 02:00 on the 1st, including the society health snapshot. Full list: <a href="cron-jobs-schedule.html">cron timings reference</a>.
           </div>
         </div>
 
@@ -791,7 +791,7 @@
             <tbody>
               <tr><td>1</td><td>Gateway net = <code>settlement_amount</code>. A dev count of payments with it empty (expected zero) is still to run before build.</td><td><span class="pill pill-green">Decided</span></td></tr>
               <tr><td>2</td><td>Payments with no <code>approved_at</code> are skipped (rare).</td><td><span class="pill pill-green">Decided</span></td></tr>
-              <tr><td>3</td><td>Job time 05:20 IST on the 1st.</td><td><span class="pill pill-amber">Awaiting confirmation</span></td></tr>
+              <tr><td>3</td><td>Job time 05:20 IST on the 1st.</td><td><span class="pill pill-green">Decided</span></td></tr>
               <tr><td>4</td><td>System entries have no user and no single payment type (see item 9 for the type).</td><td><span class="pill pill-green">Decided</span></td></tr>
               <tr><td>5</td><td>Breakdown and <code>transaction_ids</code> are stored on the entry.</td><td><span class="pill pill-green">Decided</span></td></tr>
               <tr><td>6</td><td>Society toggle defaults to <strong>on</strong>. The release update and the pop-up tell admins to review the entries and that they can turn it off.</td><td><span class="pill pill-green">Decided</span></td></tr>
