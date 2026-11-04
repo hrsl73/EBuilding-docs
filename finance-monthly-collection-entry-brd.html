@@ -325,9 +325,9 @@
       </div>
       <div class="meta-bar">
         <div class="meta-item"><strong>Document Type:</strong> Business Requirement Document (BRD)</div>
-        <div class="meta-item"><strong>Scope:</strong> Backend &bull; Frontend &bull; Admin console</div>
+        <div class="meta-item"><strong>Scope:</strong> Backend &bull; Frontend (Finance, Feature Configuration) &bull; Admin console (global flag)</div>
         <div class="meta-item"><strong>Review Status:</strong> <span class="pill pill-amber" style="padding: 2px 8px; font-size: 0.75rem;">In Review &bull; Not Approved Yet</span></div>
-        <div class="meta-item"><strong>Last Updated:</strong> 3 Nov 2026 IST</div>
+        <div class="meta-item"><strong>Last Updated:</strong> 4 Nov 2026 IST</div>
       </div>
     </div>
   </header>
@@ -446,14 +446,14 @@
               <tr><td>R4</td><td>All society bill collections count: maintenance, special bills, water charges, advance payments, place bookings and dues. See <a href="#counted">section 4</a>.</td></tr>
               <tr><td>R5</td><td>Cash, cheque and manual online payments count at their full amount.</td></tr>
               <tr><td>R6</td><td>Gateway payments count at the amount actually received, taken from the Easebuzz object on the payment.</td></tr>
-              <tr><td>R7</td><td>The entry carries a breakdown by payment type so it can be audited.</td></tr>
+              <tr><td>R7</td><td>The entry carries a breakdown by payment type so it can be audited, and shows the <strong>total amount deducted by the gateway</strong> for the month.</td></tr>
               <tr><td>R8</td><td>The entry is owned by the <strong>system</strong>, not by any admin.</td></tr>
               <tr><td>R9</td><td>Months with no collections get no entry.</td></tr>
               <tr><td>R10</td><td>Admins can delete a system entry, and can log any past month again from the create form.</td></tr>
-              <tr><td>R11</td><td>Past months of the <strong>current financial year</strong> are backfilled once, and admins are told about it with a pop-up.</td></tr>
+              <tr><td>R11</td><td>The monthly job only handles the <strong>month that just ended</strong>. Past months of the current financial year are added once by a separate one-time script, and admins are told about it with a pop-up.</td></tr>
               <tr><td>R12</td><td>Notifications follow the society's existing Finance visibility setting. Backfilled months send no notifications.</td></tr>
               <tr><td>R13</td><td>No new collection. An activity log is written whenever a system entry is added.</td></tr>
-              <tr><td>R14</td><td>The feature is controlled by a global flag and a society-level flag.</td></tr>
+              <tr><td>R14</td><td>The feature is controlled by a global flag (super admin, admin console) and a society-level toggle in <strong>Feature Configuration</strong> that the society admin turns on or off.</td></tr>
             </tbody>
           </table>
         </div>
@@ -503,6 +503,14 @@
           </table>
         </div>
         <p><strong>Entry amount</strong> = sum of the net figure across all counted payments.</p>
+        <h3>Gateway charges shown on the entry</h3>
+        <p>The entry also shows how much the gateway deducted in the month, so admins can see why the figure is lower than what members paid:</p>
+        <p><strong>Gateway charges</strong> = gateway gross − gateway net (counted), summed across the month's gateway payments.</p>
+        <ul>
+          <li>Calculated as gross minus net, not fee plus GST, so the three figures (gross, charges, received) always add up whichever settled field is confirmed in <a href="#open-items">Open Items</a>.</li>
+          <li>Gateway payments with no fee data are counted by the fallback rule. The entry notes how many there were, e.g. "Charges not available for 3 payments", so the charges figure isn't read as complete.</li>
+          <li>Cash, cheque and manual online payments have no charges.</li>
+        </ul>
         <div class="callout warning">
           <div class="callout-icon">🔍</div>
           <div class="callout-content">
@@ -541,9 +549,17 @@
           </div>
         </div>
 
+        <div class="callout info">
+          <div class="callout-icon">📅</div>
+          <div class="callout-content">
+            <div class="callout-title">Scope: the month that just ended, nothing else</div>
+            Each run handles only the previous month. It doesn't catch up on missed or earlier months, and nothing runs when a society turns the toggle on. Past months come only from the one-time script (<a href="#past-months">section 7</a>) or a manual re-log (<a href="#delete-relog">section 8</a>). This keeps the job simple and avoids surprise entries.
+          </div>
+        </div>
+
         <h3>Flow</h3>
         <div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-title">Check the global flag</div><div class="step-desc">If the feature is off platform-wide, log and stop.</div></div></div>
-        <div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-title">Load societies with the society flag on</div><div class="step-desc">Process them in batches so one large run doesn't load the server.</div></div></div>
+        <div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-title">Load societies with the Feature Configuration toggle on</div><div class="step-desc">Process them in batches so one large run doesn't load the server.</div></div></div>
         <div class="step-card"><div class="step-num">3</div><div class="step-body"><div class="step-title">Skip if the month already has an entry</div><div class="step-desc">Any system entry for that society and month, <strong>including a deleted one</strong>, means skip. A deleted month only comes back through a manual re-log.</div></div></div>
         <div class="step-card"><div class="step-num">4</div><div class="step-body"><div class="step-title">Add up the month's payments</div><div class="step-desc">Apply sections 4 and 5. Build the per-type breakdown and the list of payments counted.</div></div></div>
         <div class="step-card"><div class="step-num">5</div><div class="step-body"><div class="step-title">Skip empty months</div><div class="step-desc">No payments, no entry.</div></div></div>
@@ -559,7 +575,8 @@
         </p>
         <ul>
           <li><strong>Range:</strong> the current Indian financial year (1 April to 31 March), up to the last completed month. If run in November 2026, that's April–October 2026. From then on the monthly job takes over.</li>
-          <li><strong>How:</strong> a one-time run of the same calculation code, one entry per month with collections, for each society with the flag on.</li>
+          <li><strong>How:</strong> a one-time script, separate from the monthly job, using the same calculation code. One entry per month with collections, for each society that has the toggle on when the script runs. Which societies it covers is an open item.</li>
+          <li><strong>Societies that turn the toggle on later</strong> get no automatic past months. The monthly job picks them up from the next month end, and the admin can add earlier months with re-log.</li>
           <li><strong>No notifications</strong> for backfilled entries.</li>
           <li><strong>Pop-up:</strong> society admins see a pop-up explaining that past months were added and can be deleted if not wanted. It shows until that admin opens the Finance module. Seen status is saved on the server per admin, so it doesn't come back on another device.</li>
         </ul>
@@ -608,22 +625,27 @@
       <!-- 10. Feature Flags -->
       <section id="flags">
         <h2>10. Feature Flags</h2>
-        <p>The feature reaches every society, behind two flags, following the existing staff-attendance pattern:</p>
+        <p>The feature reaches every society, behind two flags:</p>
         <div class="table-wrapper">
           <table>
             <thead><tr><th>Level</th><th>Where</th><th>Who toggles</th></tr></thead>
             <tbody>
               <tr><td>Global</td><td>New field in <code>PlatformConfig</code> (single config document, read through a short cache)</td><td>Super admin, ebuilding-admin console</td></tr>
-              <tr><td>Society</td><td>New boolean on the <code>society</code> model</td><td>Super admin, per society</td></tr>
+              <tr><td>Society</td><td>New boolean on the <code>society</code> model, shown as a toggle in <strong>Feature Configuration → Expense Management</strong>, next to "Show Expenses to Members"</td><td>Society admin</td></tr>
             </tbody>
           </table>
         </div>
-        <p>One helper evaluates both and returns <code>{ enabled, reason }</code> (<code>GLOBAL_DISABLED</code> / <code>SOCIETY_DISABLED</code>), like <code>evaluateStaffAttendanceModuleStatus</code>. The monthly job, backfill, re-log endpoint and pop-up all use it.</p>
+        <p>One helper evaluates both and returns <code>{ enabled, reason }</code> (<code>GLOBAL_DISABLED</code> / <code>SOCIETY_DISABLED</code>), like <code>evaluateStaffAttendanceModuleStatus</code>. The monthly job, backfill script, re-log endpoint and pop-up all use it.</p>
+        <ul>
+          <li><strong>Global flag off:</strong> the toggle is hidden in Feature Configuration and nothing runs for any society.</li>
+          <li><strong>Saving the toggle</strong> goes through the existing Feature Configuration save, so it gets the existing activity log (<code>feature_config</code>) and "Feature Configuration Updated" notification with no extra work.</li>
+          <li><strong>Turning it on</strong> only makes the society eligible for the next month-end run. It doesn't create entries by itself.</li>
+        </ul>
         <div class="callout info">
           <div class="callout-icon">💡</div>
           <div class="callout-content">
             <div class="callout-title">Proposed default: society flag off</div>
-            Entries land in audit-sensitive Finance data, so societies are switched on deliberately and the backfill runs only for those.
+            Entries land in audit-sensitive Finance data, so each society admin chooses to turn it on.
           </div>
         </div>
       </section>
@@ -638,7 +660,7 @@
             <tbody>
               <tr><td><code>source</code></td><td>String enum: <code>manual</code> | <code>system</code>, default <code>manual</code></td><td>Tells system entries apart. Existing rows read as manual.</td></tr>
               <tr><td><code>period</code></td><td>String <code>YYYY-MM</code></td><td>The month the system entry covers.</td></tr>
-              <tr><td><code>breakdown</code></td><td>Object</td><td>Per payment type: count, gross, fee, GST, net.</td></tr>
+              <tr><td><code>breakdown</code></td><td>Object</td><td>Per payment type: count, gross, net. Gateway also has fee, GST, total charges (gross − net) and the count of payments with no fee data.</td></tr>
               <tr><td><code>transaction_ids</code></td><td>ObjectId[] → Transaction</td><td>Every payment counted, so each figure can be traced and recalculated.</td></tr>
               <tr><td><code>user_id</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>System ownership, same approach as the activity log.</td></tr>
               <tr><td><code>transaction_type</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>One entry spans several payment types; the breakdown carries them.</td></tr>
@@ -651,13 +673,14 @@
   "cash":    { "count": 12, "gross": 36000,  "net": 36000 },
   "cheque":  { "count": 3,  "gross": 9000,   "net": 9000 },
   "online":  { "count": 2,  "gross": 6000,   "net": 6000 },
-  "gateway": { "count": 40, "gross": 120000, "service_fee": 240, "service_tax": 43.2, "net": 119716.8 }
+  "gateway": { "count": 40, "gross": 120000, "service_fee": 240, "service_tax": 43.2,
+               "charges": 283.2, "missing_fee_count": 0, "net": 119716.8 }
 }
 // amount = 36000 + 9000 + 6000 + 119716.8 = 170716.8</code></pre>
         <h3>Other models</h3>
         <ul>
           <li><code>PlatformConfig</code>: global flag field.</li>
-          <li><code>society</code>: society flag field.</li>
+          <li><code>society</code>: society flag field, saved from Feature Configuration and returned in society details like the other feature settings.</li>
           <li><code>societyAdmin</code> (proposed): pop-up seen flag per admin.</li>
         </ul>
         <div class="callout warning">
@@ -685,8 +708,9 @@
             </tbody>
           </table>
         </div>
-        <p>The pop-up state and the society flag reach the frontend with data it already loads, either the Finance list response or the society details. Which one is decided in planning.</p>
-        <p>Admin console: get/set endpoints for the global flag and the society flag, following <code>staffAttendanceFeatureFlag.routes.js</code>.</p>
+        <p>The pop-up state reaches the frontend with data it already loads, either the Finance list response or the society details. Which one is decided in planning.</p>
+        <p><strong>Society flag:</strong> no new endpoint. It is saved through the existing society edit call the Feature Configuration screen already uses (<code>useEditSociety</code>), with the new field added to the allowed fields.</p>
+        <p><strong>Global flag:</strong> admin console get/set endpoints, following <code>staffAttendanceFeatureFlag.routes.js</code>. The society details response also tells the frontend whether the global flag is on, so it can hide the toggle.</p>
       </section>
 
       <!-- 13. UI Changes -->
@@ -695,16 +719,21 @@
         <h3>Society app (Finance)</h3>
         <ul>
           <li>System entries show a "System" label and a readable purpose, e.g. "Collections for October 2026".</li>
-          <li>Opening a system entry shows the breakdown by payment type, including the gateway fee and GST.</li>
+          <li>The system entry shows the gateway charges on the entry itself, e.g. "Gateway collections ₹1,20,000 · Gateway charges −₹283.20 · Received ₹1,19,716.80".</li>
+          <li>Opening a system entry shows the breakdown by payment type, including the gateway fee and GST, plus the "charges not available for N payments" note when it applies.</li>
           <li>Delete works as for other entries.</li>
           <li>Create form: an option to log the system entry for a past month, with a month picker limited to months that can be re-logged.</li>
           <li>Pop-up after backfill, until the admin opens Finance.</li>
           <li>All new text in English, Hindi and Gujarati.</li>
         </ul>
+        <h3>Society app (Feature Configuration)</h3>
+        <ul>
+          <li>New toggle in the Expense Management section, e.g. "Auto-add monthly collection entry", with a short description that the entry is added after each month ends.</li>
+          <li>Hidden when the global flag is off.</li>
+        </ul>
         <h3>Admin console</h3>
         <ul>
-          <li>Global toggle in Platform Config.</li>
-          <li>Per-society toggle.</li>
+          <li>Global toggle in Platform Config. No per-society toggle.</li>
         </ul>
       </section>
 
@@ -723,7 +752,11 @@
               <tr><td>Admin deleted the entry, job re-runs</td><td>Skipped. Only a manual re-log brings it back.</td></tr>
               <tr><td>Gateway payment missing fee fields</td><td>Logged, counted by the agreed fallback (open item).</td></tr>
               <tr><td>Older payment with no <code>approved_at</code></td><td>Fallback date needed (open item); matters for the backfill.</td></tr>
-              <tr><td>Society flag turned off mid-year</td><td>No new entries. Existing entries stay.</td></tr>
+              <tr><td>Society toggle turned off mid-year</td><td>No new entries. Existing entries stay.</td></tr>
+              <tr><td>Toggle turned on mid-month</td><td>The month-end run counts that <strong>whole month's</strong> collections, not only the days since the toggle went on.</td></tr>
+              <tr><td>Toggle turned on after the one-time script ran</td><td>No automatic past months. Entries start from the next month end; earlier months can be re-logged.</td></tr>
+              <tr><td>Toggle turned off and back on</td><td>Months while it was off get no entry. They can be re-logged.</td></tr>
+              <tr><td>Global flag turned off</td><td>Toggle hidden, job and re-log stop for every society. Existing entries stay.</td></tr>
               <tr><td>Two re-log requests at the same moment</td><td>The unique index lets only one succeed; the other gets a clear "already logged" error.</td></tr>
             </tbody>
           </table>
@@ -742,10 +775,11 @@
               <tr><td>3</td><td>Job time 05:20 IST on the 1st.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
               <tr><td>4</td><td>System entries have no user and no single payment type.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
               <tr><td>5</td><td>Breakdown shape and <code>transaction_ids</code> on the entry.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
-              <tr><td>6</td><td>Society flag defaults to off.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
+              <tr><td>6</td><td>Society toggle defaults to off; the society admin turns it on in Feature Configuration.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
               <tr><td>7</td><td>Re-logged entries notify like the monthly job.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
               <tr><td>8</td><td>Refunds and chargebacks after an entry is created.</td><td><span class="pill pill-gray">Out of scope for now</span></td></tr>
               <tr><td>9</td><td>Filtering Finance by payment type won't match system entries, since they have none.</td><td><span class="pill pill-blue">Accepted trade-off</span></td></tr>
+              <tr><td>10</td><td>Which societies the one-time past-months script runs for, since the toggle defaults to off and few societies will have it on at release.</td><td><span class="pill pill-amber">To decide</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -764,11 +798,12 @@
               <tr><td><code>backend: .../transaction/transaction.dao.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Query for completed payments in a month</td></tr>
               <tr><td><code>backend: src/config/cron-jobs.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>New monthly job</td></tr>
               <tr><td><code>backend: src/modules/platform/platformConfig.model.js</code> + new flag service/routes</td><td><span class="pill pill-green">NEW</span></td><td>Global flag</td></tr>
-              <tr><td><code>backend: src/modules/society/society.model.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Society flag</td></tr>
+              <tr><td><code>backend: src/modules/society/society.model.js, society.dao.js, society.service.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Society flag, saved and returned with the other feature settings</td></tr>
               <tr><td><code>backend: .../societyAdmin/societyAdmin.model.js</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Pop-up seen flag</td></tr>
-              <tr><td><code>backend: scripts/</code> backfill script</td><td><span class="pill pill-green">NEW</span></td><td>One-time current-FY backfill</td></tr>
-              <tr><td><code>frontend: src/services/society-management/expenses/*</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>System label, breakdown, re-log option, pop-up, types, i18n</td></tr>
-              <tr><td><code>admin: src/modules/PlatformConfig/*</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Global and society toggles</td></tr>
+              <tr><td><code>backend: scripts/</code> backfill script</td><td><span class="pill pill-green">NEW</span></td><td>One-time current-FY past-months script, separate from the cron</td></tr>
+              <tr><td><code>frontend: src/services/society-management/expenses/*</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>System label, gateway charges, breakdown, re-log option, pop-up, types, i18n</td></tr>
+              <tr><td><code>frontend: .../setup-new-building/feature-configuration/*</code> (Expense Management section, types, utils, hook)</td><td><span class="pill pill-blue">MODIFIED</span></td><td>Society toggle, hidden when the global flag is off</td></tr>
+              <tr><td><code>admin: src/modules/PlatformConfig/*</code></td><td><span class="pill pill-blue">MODIFIED</span></td><td>Global toggle</td></tr>
             </tbody>
           </table>
         </div>
