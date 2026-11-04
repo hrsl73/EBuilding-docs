@@ -378,7 +378,7 @@
         <h3>Out of scope</h3>
         <ul>
           <li>Changing how bills are created, paid or approved.</li>
-          <li>Refund and chargeback handling (see <a href="#open-items">Open Items</a>).</li>
+          <li>Refund and chargeback handling. Not needed.</li>
           <li>Separate entries per bill type. One combined entry for now; a split may come later.</li>
         </ul>
       </section>
@@ -421,7 +421,7 @@
               <tr><td><code>service_fee</code></td><td><code>service_charge</code></td><td>Easebuzz fee</td></tr>
               <tr><td><code>service_tax</code></td><td><code>service_tax</code></td><td>GST on the fee</td></tr>
               <tr><td><code>net_amount_debit</code></td><td><code>net_amount_debit</code></td><td>Amount debited from the payer</td></tr>
-              <tr><td><code>settlement_amount</code></td><td><code>settlement_amount</code></td><td>Amount settled to the society (to verify, see <a href="#open-items">Open Items</a>)</td></tr>
+              <tr><td><code>settlement_amount</code></td><td><code>settlement_amount</code></td><td>Amount settled to the society. <strong>This is the figure we count.</strong></td></tr>
             </tbody>
           </table>
         </div>
@@ -445,9 +445,9 @@
               <tr><td>R3</td><td>A payment belongs to the month in which it was <strong>completed</strong>, not the month of the bill it pays.</td></tr>
               <tr><td>R4</td><td>All society bill collections count: maintenance, special bills, water charges, advance payments, place bookings and dues. See <a href="#counted">section 4</a>.</td></tr>
               <tr><td>R5</td><td>Cash, cheque and manual online payments count at their full amount.</td></tr>
-              <tr><td>R6</td><td>Gateway payments count at the amount actually received, taken from the Easebuzz object on the payment.</td></tr>
+              <tr><td>R6</td><td>Gateway payments count at <code>settlement_amount</code> from the Easebuzz object on the payment, the amount actually received.</td></tr>
               <tr><td>R7</td><td>The entry carries a breakdown by payment type so it can be audited, and shows the <strong>total amount deducted by the gateway</strong> for the month.</td></tr>
-              <tr><td>R8</td><td>The entry is owned by the <strong>system</strong>, not by any admin.</td></tr>
+              <tr><td>R8</td><td>Entries created by the monthly job or the past-months script are owned by the <strong>system</strong>, not by any admin. A re-logged entry is owned by the admin who re-logged it.</td></tr>
               <tr><td>R9</td><td>Months with no collections get no entry.</td></tr>
               <tr><td>R10</td><td>Admins can delete a system entry, and can log any past month again from the create form.</td></tr>
               <tr><td>R11</td><td>The monthly job only handles the <strong>month that just ended</strong>. Past months of the current financial year are added once by a separate one-time script, and admins are told about it with a pop-up.</td></tr>
@@ -483,7 +483,7 @@
         <h3>Which payments</h3>
         <ul>
           <li>Status <code>success</code> or <code>approved</code>.</li>
-          <li><code>approved_at</code> falls inside the month, using IST month boundaries (<code>dayjsIst().startOf("month")</code> to <code>endOf("month")</code>).</li>
+          <li><code>approved_at</code> falls inside the month, using IST month boundaries (<code>dayjsIst().startOf("month")</code> to <code>endOf("month")</code>). Payments with no <code>approved_at</code> are skipped and logged; this is rare.</li>
           <li>Belongs to the society.</li>
         </ul>
       </section>
@@ -498,7 +498,7 @@
               <tr><td><code>cash</code></td><td><code>amount</code></td><td>None</td><td><code>amount</code></td></tr>
               <tr><td><code>cheque</code></td><td><code>amount</code></td><td>None</td><td><code>amount</code></td></tr>
               <tr><td><code>online</code> (manual)</td><td><code>amount</code></td><td>None</td><td><code>amount</code></td></tr>
-              <tr><td><code>gateway</code></td><td><code>payment_amount</code></td><td><code>service_fee</code> + <code>service_tax</code></td><td>Easebuzz net figure (field to confirm)</td></tr>
+              <tr><td><code>gateway</code></td><td><code>payment_amount</code></td><td><code>service_fee</code> + <code>service_tax</code></td><td><code>settlement_amount</code></td></tr>
             </tbody>
           </table>
         </div>
@@ -507,14 +507,14 @@
         <p>The entry also shows how much the gateway deducted in the month, so admins can see why the figure is lower than what members paid:</p>
         <p><strong>Gateway charges</strong> = gateway gross − gateway net (counted), summed across the month's gateway payments.</p>
         <ul>
-          <li>Calculated as gross minus net, not fee plus GST, so the three figures (gross, charges, received) always add up whichever settled field is confirmed in <a href="#open-items">Open Items</a>.</li>
+          <li>Calculated as gross minus net, not fee plus GST, so the three figures (gross, charges, received) always add up with no rounding gaps between fee, GST and settlement.</li>
           <li>Cash, cheque and manual online payments have no charges.</li>
         </ul>
         <div class="callout warning">
           <div class="callout-icon">🔍</div>
           <div class="callout-content">
-            <div class="callout-title">To verify before build</div>
-            Which stored field is the true settled amount: <code>settlement_amount</code>, or <code>payment_amount − service_fee − service_tax</code>? We must check that they agree on real dev data, and count successful gateway payments with empty fee fields. In the current code every successful gateway payment gets these fields from the Easebuzz webhook, so the count is expected to be zero. If older payments turn out to be missing them, that is handled in the past-months script, not in the monthly entry. If the job ever meets a payment with no fee data, it writes a server log for developers; admins see nothing extra.
+            <div class="callout-title">Decided: <code>settlement_amount</code></div>
+            The net figure for a gateway payment is <code>settlement_amount</code>. Before build we still count successful gateway payments on dev with an empty <code>settlement_amount</code>. In the current code every successful gateway payment gets these fields from the Easebuzz webhook, so the count is expected to be zero. If older payments turn out to be missing them, that is handled in the past-months script, not in the monthly entry. If the job ever meets a payment with no <code>settlement_amount</code>, it writes a server log for developers; admins see nothing extra.
           </div>
         </div>
       </section>
@@ -543,7 +543,7 @@
         <div class="callout success">
           <div class="callout-icon">🕔</div>
           <div class="callout-content">
-            <div class="callout-title">Proposed: 05:20 IST on the 1st (<code>"0 20 5 1 * *"</code>)</div>
+            <div class="callout-title">Proposed: 05:20 IST on the 1st (<code>"0 20 5 1 * *"</code>). Timing to be confirmed.</div>
             05:00–06:59 has no daily job. 05:20 runs after the database export and avoids the :00, :10, :15 and :30 marks used by recurring jobs.
           </div>
         </div>
@@ -594,6 +594,7 @@
         <ul>
           <li><strong>Delete:</strong> admins delete a system entry the same way as any entry (soft delete, <code>is_active: false</code>).</li>
           <li><strong>Re-log:</strong> the create form gets an option to log the system entry for a chosen month. The backend calculates the figures with the same code as the monthly job. Nothing is entered by hand.</li>
+          <li><strong>Re-logged entry:</strong> identical to a monthly-job entry (same amount, breakdown, <code>transaction_ids</code>, type and notifications). The only difference is ownership: <code>user_id</code> is the admin who re-logged it.</li>
         </ul>
         <h3>Re-log is refused when</h3>
         <ul>
@@ -614,7 +615,7 @@
             <tbody>
               <tr><td>Monthly job</td><td>Yes. Members only when <code>is_expense_management_enabled_for_member</code> is on (default on, editable by the admin).</td><td>Yes, no user (system)</td></tr>
               <tr><td>Backfill</td><td>No</td><td>Yes, no user (system)</td></tr>
-              <tr><td>Manual re-log</td><td>Same as monthly job (proposed)</td><td>Yes, the admin who re-logged</td></tr>
+              <tr><td>Manual re-log</td><td>Same as monthly job</td><td>Yes, the admin who re-logged</td></tr>
             </tbody>
           </table>
         </div>
@@ -643,8 +644,8 @@
         <div class="callout info">
           <div class="callout-icon">💡</div>
           <div class="callout-content">
-            <div class="callout-title">Proposed default: society flag off</div>
-            Entries land in audit-sensitive Finance data, so each society admin chooses to turn it on.
+            <div class="callout-title">Default value: to be decided</div>
+            Whether the society toggle starts off or on is decided later (open item 6). Entries land in audit-sensitive Finance data, so the society admin can turn it off at any time.
           </div>
         </div>
       </section>
@@ -661,8 +662,8 @@
               <tr><td><code>period</code></td><td>String <code>YYYY-MM</code></td><td>The month the system entry covers.</td></tr>
               <tr><td><code>breakdown</code></td><td>Object</td><td>Per payment type: count, gross, net. Gateway also has fee, GST and total charges (gross − net).</td></tr>
               <tr><td><code>transaction_ids</code></td><td>ObjectId[] → Transaction</td><td>Every payment counted, so each figure can be traced and recalculated.</td></tr>
-              <tr><td><code>user_id</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>System ownership, same approach as the activity log.</td></tr>
-              <tr><td><code>transaction_type</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>One entry spans several payment types; the breakdown carries them.</td></tr>
+              <tr><td><code>user_id</code></td><td>Change: not required when <code>source</code> is <code>system</code></td><td>Empty for monthly-job and script entries (system ownership, same approach as the activity log). Set to the admin for re-logged entries.</td></tr>
+              <tr><td><code>transaction_type</code></td><td>Change: new dedicated value for system entries (name to be decided)</td><td>One entry spans several payment types, so it gets its own type instead of cash/cheque/online. The breakdown carries the split. How this type behaves (filters, reports, exports) will be specified separately.</td></tr>
             </tbody>
           </table>
         </div>
@@ -750,7 +751,7 @@
               <tr><td>Job runs twice for the same month</td><td>Second run skips; the month already has an entry.</td></tr>
               <tr><td>Admin deleted the entry, job re-runs</td><td>Skipped. Only a manual re-log brings it back.</td></tr>
               <tr><td>Gateway payment missing fee fields</td><td>Not expected in current code. If it happens, a server log is written for developers (open item 1).</td></tr>
-              <tr><td>Older payment with no <code>approved_at</code></td><td>Fallback date needed (open item); matters for the backfill.</td></tr>
+              <tr><td>Payment with no <code>approved_at</code></td><td>Skipped and logged. Expected to be rare.</td></tr>
               <tr><td>Society toggle turned off mid-year</td><td>No new entries. Existing entries stay.</td></tr>
               <tr><td>Toggle turned on mid-month</td><td>The month-end run counts that <strong>whole month's</strong> collections, not only the days since the toggle went on.</td></tr>
               <tr><td>Toggle turned on after the one-time script ran</td><td>No automatic past months. Entries start from the next month end; earlier months can be re-logged.</td></tr>
@@ -769,16 +770,16 @@
           <table>
             <thead><tr><th>#</th><th>Item</th><th>Status</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Which Easebuzz field is the settled amount, and how many past gateway payments have empty fee fields (expected zero). Needs a dev data check.</td><td><span class="pill pill-amber">To verify</span></td></tr>
-              <tr><td>2</td><td>Fallback completion date for payments with no <code>approved_at</code>.</td><td><span class="pill pill-amber">To verify</span></td></tr>
-              <tr><td>3</td><td>Job time 05:20 IST on the 1st.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
-              <tr><td>4</td><td>System entries have no user and no single payment type.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
-              <tr><td>5</td><td>Breakdown shape and <code>transaction_ids</code> on the entry.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
-              <tr><td>6</td><td>Society toggle defaults to off; the society admin turns it on in Feature Configuration.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
-              <tr><td>7</td><td>Re-logged entries notify like the monthly job.</td><td><span class="pill pill-blue">Proposed</span></td></tr>
-              <tr><td>8</td><td>Refunds and chargebacks after an entry is created.</td><td><span class="pill pill-gray">Out of scope for now</span></td></tr>
-              <tr><td>9</td><td>Filtering Finance by payment type won't match system entries, since they have none.</td><td><span class="pill pill-blue">Accepted trade-off</span></td></tr>
-              <tr><td>10</td><td>Which societies the one-time past-months script runs for, since the toggle defaults to off and few societies will have it on at release.</td><td><span class="pill pill-amber">To decide</span></td></tr>
+              <tr><td>1</td><td>Gateway net = <code>settlement_amount</code>. A dev count of payments with it empty (expected zero) is still to run before build.</td><td><span class="pill pill-green">Decided</span></td></tr>
+              <tr><td>2</td><td>Payments with no <code>approved_at</code> are skipped (rare).</td><td><span class="pill pill-green">Decided</span></td></tr>
+              <tr><td>3</td><td>Job time 05:20 IST on the 1st.</td><td><span class="pill pill-amber">Awaiting confirmation</span></td></tr>
+              <tr><td>4</td><td>System entries have no user and no single payment type (see item 9 for the type).</td><td><span class="pill pill-green">Decided</span></td></tr>
+              <tr><td>5</td><td>Breakdown and <code>transaction_ids</code> are stored on the entry.</td><td><span class="pill pill-green">Decided</span></td></tr>
+              <tr><td>6</td><td>Default value of the society toggle (off or on). The society admin can change it in Feature Configuration either way.</td><td><span class="pill pill-amber">To decide</span></td></tr>
+              <tr><td>7</td><td>Re-logged entries behave like the monthly job (including notifications), but are owned by the admin who re-logged.</td><td><span class="pill pill-green">Decided</span></td></tr>
+              <tr><td>8</td><td>Refunds and chargebacks after an entry is created.</td><td><span class="pill pill-gray">Not needed</span></td></tr>
+              <tr><td>9</td><td>System entries get their own <code>transaction_type</code>. Name and behaviour to be explained.</td><td><span class="pill pill-amber">Details pending</span></td></tr>
+              <tr><td>10</td><td>Which societies the one-time past-months script runs for, which depends on the toggle's default (item 6).</td><td><span class="pill pill-amber">To decide</span></td></tr>
             </tbody>
           </table>
         </div>
