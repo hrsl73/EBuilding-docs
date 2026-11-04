@@ -536,7 +536,7 @@
         <input type="text" id="searchInput" placeholder="Search PRDs, schemas, APIs..." oninput="filterCards()">
       </div>
       <div class="stats-container">
-        <div class="stat-pill">Total Documents: <strong>3</strong></div>
+        <div class="stat-pill">Total Documents: <strong>1</strong></div>
         <div class="stat-pill">New PRD Status: <strong style="color: #b45309;">In Review (Pending Approval)</strong></div>
       </div>
     </div>
@@ -559,6 +559,9 @@
 
   <main class="cards-grid" id="cardsGrid">
 
+    <!-- Hidden from the home screen (water meter docs). Pages and URLs still work.
+         To show them again, move these cards out of the <template>. -->
+    <template id="hidden-cards">
     <!-- Card 1: NEW PROPOSED FLOW PRD -->
     <article class="doc-card card-proposed" data-title="proposed new flow water meter reading prd integrated maintenance billing architecture" data-tags="new-flow proposed prd mongodb class-diagram api-contracts maintenance-billing smart-recovery in-review">
       <div>
@@ -629,6 +632,7 @@
         </a>
       </div>
     </article>
+    </template>
 
     <!-- Card 3: FINANCE MONTHLY COLLECTION ENTRY BRD -->
     <article class="doc-card card-proposed" data-title="proposed new flow finance monthly collection entry brd maintenance easebuzz gateway charges" data-tags="new-flow proposed brd finance expense cron easebuzz settlement backfill feature-flag in-review">
